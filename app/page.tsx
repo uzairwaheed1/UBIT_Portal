@@ -11,11 +11,14 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/components/auth-provider"
 import { useToast } from "@/hooks/use-toast"
-import { GraduationCap, Shield } from "lucide-react"
+import { GraduationCap, Shield, UserCog } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function LoginPage() {
   const [adminCredentials, setAdminCredentials] = useState({ username: "", password: "" })
   const [studentCredentials, setStudentCredentials] = useState({ rollNo: "", password: "" })
+  const [facultyCredentials, setFacultyCredentials] = useState({ username: "", password: "" })
+  const [signupCredentials, setSignupCredentials] = useState({ username: "", email: "", password: "", role: "student" })
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const router = useRouter()
@@ -82,6 +85,77 @@ export default function LoginPage() {
     }
   }
 
+  const handleFacultyLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      const response = await fetch("/api/auth/faculty", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(facultyCredentials),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        login({
+          id: data.faculty._id,
+          role: "faculty",
+          facultyId: data.faculty.facultyId,
+          name: data.faculty.name,
+          email: data.faculty.email,
+          department: data.faculty.department,
+          designation: data.faculty.designation,
+          username: data.faculty.username,
+        })
+        router.push("/faculty")
+        toast({ title: "Login successful", description: `Welcome ${data.faculty.name}` })
+      } else {
+        toast({ title: "Login failed", description: data.message, variant: "destructive" })
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Something went wrong", variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      // Mock signup - simulate successful registration and login
+      const mockUser = {
+        id: `mock-${Date.now()}`,
+        role: signupCredentials.role,
+        username: signupCredentials.username,
+        email: signupCredentials.email,
+        // Add role-specific fields with mock data
+        ...(signupCredentials.role === "student" ? {
+          rollNo: signupCredentials.username,
+          name: signupCredentials.username,
+          semester: 1,
+          domain: "general",
+        } : {
+          facultyId: `F${Date.now()}`,
+          name: signupCredentials.username,
+          department: "Computer Science",
+          designation: "Professor",
+        })
+      }
+
+      login(mockUser)
+      toast({ title: "Signup successful", description: "Welcome to UBIT Portal!" })
+      router.push(`/${signupCredentials.role}`)
+    } catch (error) {
+      toast({ title: "Error", description: "Something went wrong", variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex">
       {/* Left Panel - UBIT Image */}
@@ -122,10 +196,14 @@ export default function LoginPage() {
           </div>
 
           <Tabs defaultValue="student" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="student" className="flex items-center gap-2">
                 <GraduationCap className="h-4 w-4" />
                 Student
+              </TabsTrigger>
+              <TabsTrigger value="faculty" className="flex items-center gap-2">
+                <UserCog className="h-4 w-4" />
+                Faculty
               </TabsTrigger>
               <TabsTrigger value="admin" className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
@@ -207,6 +285,111 @@ export default function LoginPage() {
                     </div>
                     <Button type="submit" className="w-full h-11" disabled={loading}>
                       {loading ? "Signing in..." : "Sign In"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="faculty">
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-xl">Faculty Login</CardTitle>
+                  <CardDescription>Enter your username and password to access your dashboard</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleFacultyLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="facultyUsername">Username</Label>
+                      <Input
+                        id="facultyUsername"
+                        type="text"
+                        placeholder="Enter your username"
+                        value={facultyCredentials.username}
+                        onChange={(e) => setFacultyCredentials((prev) => ({ ...prev, username: e.target.value }))}
+                        required
+                        className="h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="facultyPassword">Password</Label>
+                      <Input
+                        id="facultyPassword"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={facultyCredentials.password}
+                        onChange={(e) => setFacultyCredentials((prev) => ({ ...prev, password: e.target.value }))}
+                        required
+                        className="h-11"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full h-11" disabled={loading}>
+                      {loading ? "Signing in..." : "Sign In"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="signup">
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-xl">User Signup</CardTitle>
+                  <CardDescription>Create a new account to access the portal</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signupRole">Role</Label>
+                      <Select
+                        value={signupCredentials.role}
+                        onValueChange={(value) => setSignupCredentials((prev) => ({ ...prev, role: value }))}
+                      >
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="faculty">Faculty</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signupUsername">{signupCredentials.role === "student" ? "Roll Number" : "Username"}</Label>
+                      <Input
+                        id="signupUsername"
+                        type="text"
+                        placeholder={`Enter ${signupCredentials.role === "student" ? "roll number" : "username"}`}
+                        value={signupCredentials.username}
+                        onChange={(e) => setSignupCredentials((prev) => ({ ...prev, username: e.target.value }))}
+                        required
+                        className="h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signupEmail">Email</Label>
+                      <Input
+                        id="signupEmail"
+                        type="email"
+                        placeholder="Enter email"
+                        value={signupCredentials.email}
+                        onChange={(e) => setSignupCredentials((prev) => ({ ...prev, email: e.target.value }))}
+                        required
+                        className="h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signupPassword">Password</Label>
+                      <Input
+                        id="signupPassword"
+                        type="password"
+                        placeholder="Enter password"
+                        value={signupCredentials.password}
+                        onChange={(e) => setSignupCredentials((prev) => ({ ...prev, password: e.target.value }))}
+                        required
+                        className="h-11"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full h-11" disabled={loading}>
+                      {loading ? "Signing up..." : "Sign Up"}
                     </Button>
                   </form>
                 </CardContent>

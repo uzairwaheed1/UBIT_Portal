@@ -1,14 +1,33 @@
+// For preview mode without DB, mock the admin login
 import { type NextRequest, NextResponse } from "next/server"
-import connectDB from "@/lib/mongodb"
-import Admin from "@/lib/models/Admin"
-import Faculty from "@/lib/models/Faculty"
+// import connectDB from "@/lib/mongodb"
+// import Admin from "@/lib/models/Admin"
+// import Faculty from "@/lib/models/Faculty"
 
 export async function POST(request: NextRequest) {
   try {
-    await connectDB()
+    // await connectDB()
 
     const { username, password } = await request.json()
 
+    // Mock admin credentials check
+    if (username === "admin" && password === "admin123") {
+      return NextResponse.json({
+        success: true,
+        message: "Login successful",
+        admin: {
+          id: "mock-admin-id",
+          username: "admin",
+          name: "Admin User",
+          source: "admin",
+        },
+      })
+    } else {
+      return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 401 })
+    }
+
+    // Original code commented out for preview
+    /*
     // Check in Admin collection first
     let admin = await Admin.findOne({ username })
     let isFromFaculty = false
@@ -41,6 +60,7 @@ export async function POST(request: NextRequest) {
         source: isFromFaculty ? "faculty" : "admin",
       },
     })
+    */
   } catch (error) {
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
   }
