@@ -21,6 +21,7 @@ import {
   Settings,
   LineChart,
   Lock,
+  BookLock,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -43,9 +44,9 @@ const navigation = [
     icon: LineChart,
   },
   {
-    name: "Manage Assessments",
-    href: "/faculty/assessments/manage",
-    icon: PenTool,
+    name: "Terminal Mapping",
+    href: "/faculty/assessments/terminal-mapping",
+    icon: BookLock,
   },
   {
     name: "Marks Entry",

@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, FileText, BookOpen, Calendar, ClipboardCheck, AlertCircle, BarChart3, FileUp } from "lucide-react"
+import { Users, FileText, BookOpen, Calendar, ClipboardCheck, AlertCircle, BarChart3, FileUp, Mail, Phone, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useAuth } from "@/components/auth-provider"
 
 interface Stats {
   totalStudents: number
@@ -20,6 +21,7 @@ interface Activity {
 }
 
 export default function FacultyDashboard() {
+  const { user } = useAuth()
   const [stats, setStats] = useState<Stats>({
     totalStudents: 0,
     totalCourses: 0,
@@ -28,14 +30,20 @@ export default function FacultyDashboard() {
   })
   
   const [activities, setActivities] = useState<Activity[]>([])
+  const [profileData, setProfileData] = useState({
+    name: user?.name || "Dr. Alana Reed",
+    department: "Computer Science Department",
+    email: user?.email || "areed@uni.edu",
+    phone: "555-123-4567",
+  })
 
   useEffect(() => {
     // Mock stats for preview since no DB
     setStats({
       totalStudents: 45,
       totalCourses: 3,
-      pendingEvaluations: 4,
-      completedAssessments: 8,
+      pendingEvaluations: 1,
+      completedAssessments: 2,
     })
     
     // Mock recent activities
@@ -46,11 +54,66 @@ export default function FacultyDashboard() {
       { id: "4", action: "Generated CLO attainment report", timestamp: "2 days ago, 4:45 PM" },
       { id: "5", action: "Updated assessment roadmap for SE201", timestamp: "3 days ago, 9:10 AM" },
     ])
-  }, [])
+  }, [user])
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Faculty Dashboard</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+      <p className="text-gray-600 mb-8">Welcome back, {profileData.name}</p>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Profile Card */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center text-indigo-700">
+              <UserCircle className="h-5 w-5 mr-2" />
+              Faculty Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-gray-900">{profileData.name}</p>
+            <p className="text-gray-500 mt-1">{profileData.department}</p>
+            <div className="mt-4 text-sm space-y-2">
+              <p className="text-gray-700 flex items-center">
+                <Mail className="h-4 w-4 mr-2 text-indigo-500" />
+                {profileData.email}
+              </p>
+              <p className="text-gray-700 flex items-center">
+                <Phone className="h-4 w-4 mr-2 text-indigo-500" />
+                {profileData.phone}
+              </p>
+            </div>
+            <Link href="/faculty/profile">
+              <Button variant="link" className="mt-4 p-0 text-indigo-600 hover:text-indigo-800">
+                Update Contact Info →
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Quick Stats */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Stats</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center border-b pb-2">
+                <span className="text-gray-500">Total Courses</span>
+                <span className="text-2xl font-bold text-indigo-600">{stats.totalCourses}</span>
+              </div>
+              <div className="flex justify-between items-center border-b pb-2">
+                <span className="text-gray-500">Pending Evaluations</span>
+                <span className="text-2xl font-bold text-yellow-600">{stats.pendingEvaluations}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">Submitted Reports</span>
+                <span className="text-2xl font-bold text-green-600">{stats.completedAssessments}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="border-l-4 border-blue-500">
