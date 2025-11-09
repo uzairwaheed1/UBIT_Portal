@@ -17,9 +17,11 @@ import {
   Plus,
   Upload,
   UserCheck,
+  Calendar,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: GraduationCap },
@@ -43,6 +45,7 @@ const navigation = [
     name: "Academic",
     icon: FileText,
     submenu: [
+      { name: "Semesters", href: "/admin/semesters", icon: Calendar },
       { name: "Upload Marks", href: "/admin/upload-marks", icon: Upload },
       { name: "View Marks", href: "/admin/view-marks", icon: Eye },
       { name: "Create Assignment", href: "/admin/create-assignment", icon: Plus },
@@ -87,49 +90,51 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           <nav className="flex-1 mt-6 px-4 pb-6 overflow-y-auto">
-            {navigation.map((item) => (
-              <div key={item.name} className="mb-2">
-                {item.submenu ? (
-                  <div>
-                    <div className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 mb-2">
+            <Accordion type="multiple" className="space-y-2">
+              {navigation.map((item) => (
+                <div key={item.name}>
+                  {item.submenu ? (
+                    <AccordionItem value={item.name} className="border-b-0">
+                      <AccordionTrigger className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:no-underline">
+                        <item.icon className="mr-3 h-5 w-5" />
+                        {item.name}
+                      </AccordionTrigger>
+                      <AccordionContent className="ml-6 space-y-1 pb-0">
+                        {item.submenu.map((subItem) => {
+                          const isActive = pathname === subItem.href
+                          return (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${
+                                isActive
+                                  ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                              }`}
+                            >
+                              <subItem.icon className="mr-3 h-4 w-4" />
+                              {subItem.name}
+                            </Link>
+                          )
+                        })}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        pathname === item.href
+                          ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
                       <item.icon className="mr-3 h-5 w-5" />
                       {item.name}
-                    </div>
-                    <div className="ml-6 space-y-1">
-                      {item.submenu.map((subItem) => {
-                        const isActive = pathname === subItem.href
-                        return (
-                          <Link
-                            key={subItem.name}
-                            href={subItem.href}
-                            className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${
-                              isActive
-                                ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                            }`}
-                          >
-                            <subItem.icon className="mr-3 h-4 w-4" />
-                            {subItem.name}
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      pathname === item.href
-                        ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
-                  >
-                    <item.icon className="mr-3 h-5 w-5" />
-                    {item.name}
-                  </Link>
-                )}
-              </div>
-            ))}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </Accordion>
           </nav>
 
           {/* Fixed Logout Button at Bottom */}

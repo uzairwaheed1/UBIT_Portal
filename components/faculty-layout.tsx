@@ -27,21 +27,25 @@ import { usePathname } from "next/navigation"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 const navigation = [
-  { name: "Dashboard", href: "/faculty", icon: UserCheck },
+  { 
+    name: "Dashboard", 
+    href: "/faculty", 
+    icon: GraduationCap 
+  },
   {
     name: "My Courses",
     href: "/faculty/courses",
     icon: BookOpen,
   },
   {
-    name: "Assessments",
-    icon: ClipboardList,
-    submenu: [
-      { name: "Assessment Roadmap", href: "/faculty/assessments/roadmap", icon: LineChart },
-      { name: "Manage Assessments", href: "/faculty/assessments/manage", icon: PenTool },
-      { name: "Create Assessment", href: "/faculty/assessments/create", icon: Plus },
-      { name: "View Assessments", href: "/faculty/assessments/view", icon: Eye },
-    ],
+    name: "Assessment Roadmap",
+    href: "/faculty/assessments/roadmap",
+    icon: LineChart,
+  },
+  {
+    name: "Manage Assessments",
+    href: "/faculty/assessments/manage",
+    icon: PenTool,
   },
   {
     name: "Marks Entry",
@@ -59,7 +63,6 @@ const navigation = [
     submenu: [
       { name: "CLO Attainment", href: "/faculty/reports/clo-attainment", icon: LineChart },
       { name: "Assessment Performance", href: "/faculty/reports/assessment-performance", icon: BarChart3 },
-      { name: "Student Comparison", href: "/faculty/reports/student-comparison", icon: Users },
     ],
   },
   {

@@ -106,7 +106,7 @@ export default function FacultyDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <Link href="/faculty/assessments/create">
+              <Link href="/faculty/assessments">
                 <Button variant="outline" className="w-full justify-start">
                   <FileText className="mr-2 h-4 w-4" />
                   Create Assessment
