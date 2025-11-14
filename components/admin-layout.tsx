@@ -5,73 +5,67 @@ import type React from "react"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
 import {
-  Users,
-  FileText,
-  BookOpen,
-  DollarSign,
-  Clock,
-  Trophy,
   LogOut,
   GraduationCap,
-  Eye,
-  Plus,
-  Upload,
   UserCheck,
   Calendar,
+  Users,
+  BookOpen,
+  Target,
+  Settings,
+  BarChart3,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 const navigation = [
-  { name: "Dashboard", href: "/admin", icon: GraduationCap },
-  {
-    name: "Students",
-    icon: Users,
-    submenu: [
-      { name: "Add Student", href: "/admin/add-student", icon: Plus },
-      { name: "View Students", href: "/admin/view-students", icon: Eye },
-    ],
+  { 
+    name: "Dashboard", 
+    href: "/admin", 
+    icon: GraduationCap,
+    number: "C0"
   },
-  {
-    name: "Faculty",
+  { 
+    name: "Manage Faculty", 
+    href: "/admin/manage-faculty", 
     icon: UserCheck,
-    submenu: [
-      { name: "Add Faculty", href: "/admin/add-faculty", icon: Plus },
-      { name: "View Faculty", href: "/admin/view-faculty", icon: Eye },
-    ],
+    number: "C1"
   },
-  {
-    name: "Academic",
-    icon: FileText,
-    submenu: [
-      { name: "Semesters", href: "/admin/semesters", icon: Calendar },
-      { name: "Upload Marks", href: "/admin/upload-marks", icon: Upload },
-      { name: "View Marks", href: "/admin/view-marks", icon: Eye },
-      { name: "Create Assignment", href: "/admin/create-assignment", icon: Plus },
-      { name: "View Assignments", href: "/admin/view-assignments", icon: Eye },
-    ],
+  { 
+    name: "Batch & Semester Management", 
+    href: "/admin/batch-semester", 
+    icon: Calendar,
+    number: "C2"
   },
-  {
-    name: "Resources",
+  { 
+    name: "Student Management", 
+    href: "/admin/student-management", 
+    icon: Users,
+    number: "C3"
+  },
+  { 
+    name: "Course Management", 
+    href: "/admin/course-management", 
     icon: BookOpen,
-    submenu: [
-      { name: "Upload Notes", href: "/admin/upload-notes", icon: Upload },
-      { name: "View Notes", href: "/admin/view-notes", icon: Eye },
-      { name: "Manage Courses", href: "/admin/manage-courses", icon: BookOpen },
-    ],
+    number: "C4"
   },
-  {
-    name: "Management",
-    icon: DollarSign,
-    submenu: [
-      { name: "Update Fees", href: "/admin/update-fees", icon: DollarSign },
-      { name: "View Fees", href: "/admin/view-fees", icon: Eye },
-      { name: "Upload Timetable", href: "/admin/upload-timetable", icon: Clock },
-      { name: "View Timetable", href: "/admin/view-timetable", icon: Eye },
-      { name: "Upload Events", href: "/admin/upload-events", icon: Trophy },
-      { name: "View Events", href: "/admin/view-events", icon: Eye },
-    ],
+  { 
+    name: "CLO/PLO/PEO Management", 
+    href: "/admin/outcome-management", 
+    icon: Target,
+    number: "C5"
+  },
+  { 
+    name: "OBE Configuration", 
+    href: "/admin/obe-config", 
+    icon: Settings,
+    number: "C6"
+  },
+  { 
+    name: "Reports & Analytics", 
+    href: "/admin/reports", 
+    icon: BarChart3,
+    number: "C7"
   },
 ]
 
@@ -89,52 +83,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <p className="text-sm text-gray-600 mt-1">University Management System</p>
           </div>
 
-          <nav className="flex-1 mt-6 px-4 pb-6 overflow-y-auto">
-            <Accordion type="multiple" className="space-y-2">
-              {navigation.map((item) => (
-                <div key={item.name}>
-                  {item.submenu ? (
-                    <AccordionItem value={item.name} className="border-b-0">
-                      <AccordionTrigger className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:no-underline">
-                        <item.icon className="mr-3 h-5 w-5" />
-                        {item.name}
-                      </AccordionTrigger>
-                      <AccordionContent className="ml-6 space-y-1 pb-0">
-                        {item.submenu.map((subItem) => {
-                          const isActive = pathname === subItem.href
-                          return (
-                            <Link
-                              key={subItem.name}
-                              href={subItem.href}
-                              className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${
-                                isActive
-                                  ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                              }`}
-                            >
-                              <subItem.icon className="mr-3 h-4 w-4" />
-                              {subItem.name}
-                            </Link>
-                          )
-                        })}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                        pathname === item.href
-                          ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      }`}
-                    >
-                      <item.icon className="mr-3 h-5 w-5" />
-                      {item.name}
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </Accordion>
+          <nav className="flex-1 mt-6 px-4 pb-6 overflow-y-auto space-y-2">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    isActive
+                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  <span className="mr-3 flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
+                    {item.number}
+                  </span>
+                  <item.icon className="mr-3 h-5 w-5" />
+                  <span className="flex-1">{item.name}</span>
+                </Link>
+              )
+            })}
           </nav>
 
           {/* Fixed Logout Button at Bottom */}

@@ -2,18 +2,35 @@ import { NextResponse } from "next/server"
 import connectDB from "@/lib/mongodb"
 import Student from "@/lib/models/Student"
 import Course from "@/lib/models/Course"
-import Assignment from "@/lib/models/Assignment"
-import Event from "@/lib/models/Event"
+import Faculty from "@/lib/models/Faculty"
+import Batch from "@/lib/models/Batch"
+import Semester from "@/lib/models/Semester"
+import CLO from "@/lib/models/CLO"
+import PLO from "@/lib/models/PLO"
+import PEO from "@/lib/models/PEO"
 
 export async function GET() {
   try {
     await connectDB()
 
-    const [totalStudents, totalCourses, totalAssignments, upcomingEvents] = await Promise.all([
+    const [
+      totalStudents,
+      totalCourses,
+      totalFaculty,
+      totalBatches,
+      activeSemesters,
+      totalCLOs,
+      totalPLOs,
+      totalPEOs,
+    ] = await Promise.all([
       Student.countDocuments(),
       Course.countDocuments(),
-      Assignment.countDocuments(),
-      Event.countDocuments({ time: { $gte: new Date() } }),
+      Faculty.countDocuments(),
+      Batch.countDocuments(),
+      Semester.countDocuments({ status: "Active" }),
+      CLO.countDocuments(),
+      PLO.countDocuments(),
+      PEO.countDocuments(),
     ])
 
     return NextResponse.json({
@@ -21,8 +38,12 @@ export async function GET() {
       stats: {
         totalStudents,
         totalCourses,
-        totalAssignments,
-        upcomingEvents,
+        totalFaculty,
+        totalBatches,
+        activeSemesters,
+        totalCLOs,
+        totalPLOs,
+        totalPEOs,
       },
     })
   } catch (error) {

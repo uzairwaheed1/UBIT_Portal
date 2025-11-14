@@ -6,6 +6,7 @@ import { PieChart, Pie, Cell, Sector } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 // Mock data
 const cloAttainmentData = [
@@ -58,6 +59,12 @@ export default function Reports() {
             </Link>
             <Link href="/faculty/reports/student-comparison">
               <Button variant="outline" className="w-full">Student Comparison</Button>
+            </Link>
+            <Link href="/faculty/reports/auto-mapped-plo">
+              <Button variant="outline" className="w-full">Auto-mapped to PLO</Button>
+            </Link>
+            <Link href="/faculty/reports/clo-plo-attainment">
+              <Button variant="outline" className="w-full">Generate Reports - CLO/PLO Attainment</Button>
             </Link>
           </div>
         </CardContent>

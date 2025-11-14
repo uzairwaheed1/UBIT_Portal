@@ -64,6 +64,8 @@ const navigation = [
     submenu: [
       { name: "CLO Attainment", href: "/faculty/reports/clo-attainment", icon: LineChart },
       { name: "Assessment Performance", href: "/faculty/reports/assessment-performance", icon: BarChart3 },
+      { name: "Auto-mapped to PLO", href: "/faculty/reports/auto-mapped-plo", icon: ClipboardList },
+      { name: "Generate Reports - CLO/PLO Attainment", href: "/faculty/reports/clo-plo-attainment", icon: BarChart3 },
     ],
   },
   {
