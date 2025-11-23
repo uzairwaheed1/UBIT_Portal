@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { Search, FileText, Edit, Trash2, Download, Play } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function ViewNotes() {
   const [notes, setNotes] = useState([])
@@ -44,7 +45,7 @@ export default function ViewNotes() {
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch("/api/notes")
+      const response = await apiFetch("/api/notes")
       const data = await response.json()
       if (data.success) {
         setNotes(data.notes)
@@ -93,7 +94,7 @@ export default function ViewNotes() {
         finalData.fileUrl = editFormData.youtubeUrl
       }
 
-      const response = await fetch(`/api/notes/${editingNote._id}`, {
+      const response = await apiFetch(`/api/notes/${editingNote._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(finalData),
@@ -115,7 +116,7 @@ export default function ViewNotes() {
 
   const handleDelete = async (noteId: string) => {
     try {
-      const response = await fetch(`/api/notes/${noteId}`, {
+      const response = await apiFetch(`/api/notes/${noteId}`, {
         method: "DELETE",
       })
 

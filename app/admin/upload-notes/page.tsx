@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Upload, FileText, Video } from "lucide-react"
+import { apiFetch } from "@/lib/api-client"
 
 export default function UploadNotes() {
   const [formData, setFormData] = useState({
@@ -32,7 +33,7 @@ export default function UploadNotes() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("/api/courses")
+      const response = await apiFetch("/api/courses")
       const data = await response.json()
       if (data.success) {
         setCourses(data.courses)
@@ -82,7 +83,7 @@ export default function UploadNotes() {
     try {
       let fileUrl = ""
       let fileName = ""
-      let videoId = ""
+      let videoId: string | undefined
 
       if (formData.noteType === "pdf") {
         if (!selectedFile) {
@@ -101,17 +102,18 @@ export default function UploadNotes() {
           return
         }
 
-        videoId = extractYouTubeVideoId(formData.youtubeUrl)
-        if (!videoId) {
+        const extractedVideoId = extractYouTubeVideoId(formData.youtubeUrl)
+        if (!extractedVideoId) {
           toast({ title: "Error", description: "Invalid YouTube URL", variant: "destructive" })
           setLoading(false)
           return
         }
+        videoId = extractedVideoId
         fileUrl = formData.youtubeUrl
         fileName = formData.title
       }
 
-      const response = await fetch("/api/notes", {
+      const response = await apiFetch("/api/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -121,7 +123,7 @@ export default function UploadNotes() {
           course: formData.course,
           fileUrl,
           fileName,
-          videoId,
+          videoId: videoId || "",
           noteType: formData.noteType,
         }),
       })

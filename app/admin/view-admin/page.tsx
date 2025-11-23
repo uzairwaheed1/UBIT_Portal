@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { Pencil, Trash2, Mail, User, Users, Calendar, Briefcase, CheckCircle2, XCircle, Shield, Send } from "lucide-react"
+import { Pencil, Trash2, Mail, User, Users, Phone, Briefcase, CheckCircle2, XCircle, Shield, Send } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -19,38 +19,38 @@ import { apiFetch } from "@/lib/api-client"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-interface UpdateFacultyDto {
+interface UpdateAdminDto {
   name?: string
   email?: string
   designation?: string
   department?: string
-  joining_date?: string
+  contact_no?: string
 }
 
-export default function ViewFaculty() {
-  const [faculty, setFaculty] = useState([])
+export default function ViewAdmin() {
+  const [admins, setAdmins] = useState([])
   const [loading, setLoading] = useState(true)
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, facultyId: "", facultyName: "" })
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, adminId: "", adminName: "" })
   const [deleting, setDeleting] = useState(false)
   const [resendingInvitation, setResendingInvitation] = useState<number | null>(null)
-  const [editDialog, setEditDialog] = useState({ open: false, faculty: null as any })
+  const [editDialog, setEditDialog] = useState({ open: false, admin: null as any })
   const [editing, setEditing] = useState(false)
-  const [editFormData, setEditFormData] = useState<UpdateFacultyDto>({
+  const [editFormData, setEditFormData] = useState<UpdateAdminDto>({
     name: "",
     email: "",
     designation: "",
     department: "",
-    joining_date: "",
+    contact_no: "",
   })
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchFaculty()
+    fetchAdmins()
   }, [])
 
-  const fetchFaculty = async () => {
+  const fetchAdmins = async () => {
     try {
-      const response = await apiFetch("/admin/faculty?page=1&limit=100", {
+      const response = await apiFetch("/admin/admins?page=1&limit=100", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       })
@@ -58,92 +58,81 @@ export default function ViewFaculty() {
       console.log("data", data)
       if (data.success || data.data) {
         // Handle both data.success and data.data response structures
-        setFaculty(data.data || data.faculty || [])
-        console.log("faculty", faculty)
+        setAdmins(data.data || data.admins || [])
+        console.log("admins", admins)
       }
     } catch (error) {
-      console.error("Error fetching faculty:", error)
-      toast({ title: "Error", description: "Failed to fetch faculty data", variant: "destructive" })
+      console.error("Error fetching admins:", error)
+      toast({ title: "Error", description: "Failed to fetch admin data", variant: "destructive" })
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDeleteClick = (facultyId: string, facultyName: string) => {
-    setDeleteDialog({ open: true, facultyId, facultyName })
+  const handleDeleteClick = (adminId: string, adminName: string) => {
+    setDeleteDialog({ open: true, adminId, adminName })
   }
 
   const handleDeleteConfirm = async () => {
     setDeleting(true)
     try {
-      const response = await apiFetch(`/admin/faculty/${deleteDialog.facultyId}`, {
+      const response = await apiFetch(`/admin/admins/${deleteDialog.adminId}`, {
         method: "DELETE",
       })
 
       if (response.ok) {
-        toast({ title: "Success", description: "Faculty member deleted successfully" })
-        fetchFaculty()
+        toast({ title: "Success", description: "Admin user deleted successfully" })
+        fetchAdmins()
       } else {
-        toast({ title: "Error", description: "Failed to delete faculty member", variant: "destructive" })
+        toast({ title: "Error", description: "Failed to delete admin user", variant: "destructive" })
       }
     } catch (error) {
       toast({ title: "Error", description: "Something went wrong", variant: "destructive" })
     } finally {
       setDeleting(false)
-      setDeleteDialog({ open: false, facultyId: "", facultyName: "" })
+      setDeleteDialog({ open: false, adminId: "", adminName: "" })
     }
   }
 
   const handleDeleteCancel = () => {
-    setDeleteDialog({ open: false, facultyId: "", facultyName: "" })
+    setDeleteDialog({ open: false, adminId: "", adminName: "" })
   }
 
-  const handleEditClick = (facultyMember: any) => {
-    // Format joining_date for input (YYYY-MM-DD)
-    let formattedDate = ""
-    if (facultyMember.joining_date) {
-      try {
-        const date = new Date(facultyMember.joining_date)
-        formattedDate = date.toISOString().split("T")[0]
-      } catch {
-        formattedDate = ""
-      }
-    }
-
+  const handleEditClick = (admin: any) => {
     setEditFormData({
-      name: facultyMember.name || "",
-      email: facultyMember.email || "",
-      designation: facultyMember.designation || "",
-      department: facultyMember.department || "",
-      joining_date: formattedDate,
+      name: admin.name || "",
+      email: admin.email || "",
+      designation: admin.designation || "",
+      department: admin.department || "",
+      contact_no: admin.contact_no || "",
     })
-    setEditDialog({ open: true, faculty: facultyMember })
+    setEditDialog({ open: true, admin })
   }
 
   const handleEditCancel = () => {
-    setEditDialog({ open: false, faculty: null })
+    setEditDialog({ open: false, admin: null })
     setEditFormData({
       name: "",
       email: "",
       designation: "",
       department: "",
-      joining_date: "",
+      contact_no: "",
     })
   }
 
   const handleEditConfirm = async () => {
-    if (!editDialog.faculty) return
+    if (!editDialog.admin) return
 
     setEditing(true)
     try {
-      const updateData: UpdateFacultyDto = {}
+      const updateData: UpdateAdminDto = {}
       if (editFormData.name) updateData.name = editFormData.name
       if (editFormData.email) updateData.email = editFormData.email
       if (editFormData.designation) updateData.designation = editFormData.designation
       if (editFormData.department) updateData.department = editFormData.department
-      if (editFormData.joining_date) updateData.joining_date = editFormData.joining_date
+      if (editFormData.contact_no) updateData.contact_no = editFormData.contact_no
 
-      const response = await apiFetch(`/admin/faculty/${editDialog.faculty.id || editDialog.faculty._id}`, {
+      const response = await apiFetch(`/admin/admins/${editDialog.admin.id || editDialog.admin._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updateData),
@@ -152,29 +141,16 @@ export default function ViewFaculty() {
       const data = await response.json()
 
       if (response.ok) {
-        toast({ title: "Success", description: "Faculty member updated successfully" })
-        fetchFaculty()
+        toast({ title: "Success", description: "Admin updated successfully" })
+        fetchAdmins()
         handleEditCancel()
       } else {
-        toast({ title: "Error", description: data.message || "Failed to update faculty member", variant: "destructive" })
+        toast({ title: "Error", description: data.message || "Failed to update admin", variant: "destructive" })
       }
     } catch (error) {
       toast({ title: "Error", description: "Something went wrong", variant: "destructive" })
     } finally {
       setEditing(false)
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A"
-    try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    } catch {
-      return dateString
     }
   }
 
@@ -221,8 +197,8 @@ export default function ViewFaculty() {
       
       if (response.ok) {
         toast({ title: "Success", description: "Invitation resent successfully" })
-        // Refresh faculty list to get updated data
-        fetchFaculty()
+        // Refresh admin list to get updated data
+        fetchAdmins()
       } else {
         toast({ title: "Error", description: data.message || "Failed to resent invitation", variant: "destructive" })
       }
@@ -238,52 +214,52 @@ export default function ViewFaculty() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading faculty data...</p>
+          <p className="text-gray-600">Loading admin data...</p>
         </div>
       </div>
     )
   }
 
-  const facultyCount = faculty.length
+  const adminCount = admins.length
 
   return (
     <div className="space-y-6">
       {/* Header with Count */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Faculty Members</h1>
-          <p className="text-gray-600 mt-2">Manage and view all faculty members</p>
+          <h1 className="text-3xl font-bold text-gray-900">Admin Users</h1>
+          <p className="text-gray-600 mt-2">Manage and view all admin users</p>
         </div>
         <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="bg-blue-100 p-3 rounded-full">
-                <Users className="h-6 w-6 text-blue-600" />
+                <Shield className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Faculty</p>
-                <p className="text-2xl font-bold text-blue-600">{facultyCount}</p>
+                <p className="text-sm text-gray-600">Total Admins</p>
+                <p className="text-2xl font-bold text-blue-600">{adminCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Faculty Table */}
+      {/* Admin Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Faculty Directory
+            <Shield className="h-5 w-5" />
+            Admin Directory
           </CardTitle>
-          <CardDescription>Complete list of all faculty members</CardDescription>
+          <CardDescription>Complete list of all admin users</CardDescription>
         </CardHeader>
         <CardContent>
-          {faculty.length === 0 ? (
+          {admins.length === 0 ? (
             <div className="text-center py-12">
-              <User className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-600 mb-2">No faculty members found</p>
-              <p className="text-sm text-gray-500">Add faculty members to see them here</p>
+              <Shield className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-gray-600 mb-2">No admin users found</p>
+              <p className="text-sm text-gray-500">Add admin users to see them here</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -293,13 +269,14 @@ export default function ViewFaculty() {
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Designation</TableHead>
-                    <TableHead>Joining Date</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Contact</TableHead>
                     <TableHead>Account Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {faculty.map((member: any) => (
+                  {admins.map((member: any) => (
                     <TableRow key={member.id || member._id} className="hover:bg-gray-50">
                       <TableCell className="font-medium align-middle">
                         <div className="flex items-center gap-2">
@@ -345,11 +322,22 @@ export default function ViewFaculty() {
                         </div>
                       </TableCell>
                       <TableCell className="align-middle">
+                        <div className="flex items-center">
+                          {member.department ? (
+                            <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                              <span className="whitespace-nowrap">{member.department}</span>
+                            </Badge>
+                          ) : (
+                            <span className="text-gray-400 text-sm">Not specified</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="align-middle">
                         <div className="flex items-center gap-2">
-                          {member.joining_date ? (
+                          {member.contact_no ? (
                             <>
-                              <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                              <span className="text-sm whitespace-nowrap">{formatDate(member.joining_date)}</span>
+                              <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                              <span className="text-sm whitespace-nowrap">{member.contact_no}</span>
                             </>
                           ) : (
                             <span className="text-gray-400 text-sm">N/A</span>
@@ -423,9 +411,9 @@ export default function ViewFaculty() {
       <Dialog open={deleteDialog.open} onOpenChange={handleDeleteCancel}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Faculty Member</DialogTitle>
+            <DialogTitle>Delete Admin User</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <strong>{deleteDialog.facultyName}</strong>? This action cannot be undone.
+              Are you sure you want to delete <strong>{deleteDialog.adminName}</strong>? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -443,8 +431,8 @@ export default function ViewFaculty() {
       <Dialog open={editDialog.open} onOpenChange={handleEditCancel}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Faculty Member</DialogTitle>
-            <DialogDescription>Update the faculty member information below.</DialogDescription>
+            <DialogTitle>Edit Admin User</DialogTitle>
+            <DialogDescription>Update the admin user information below.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -485,13 +473,12 @@ export default function ViewFaculty() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-joining-date">Joining Date</Label>
+              <Label htmlFor="edit-contact">Contact Number</Label>
               <Input
-                id="edit-joining-date"
-                type="date"
-                value={editFormData.joining_date}
-                onChange={(e) => setEditFormData({ ...editFormData, joining_date: e.target.value })}
-                placeholder="Enter joining date"
+                id="edit-contact"
+                value={editFormData.contact_no}
+                onChange={(e) => setEditFormData({ ...editFormData, contact_no: e.target.value })}
+                placeholder="Enter contact number"
               />
             </div>
           </div>
@@ -508,3 +495,4 @@ export default function ViewFaculty() {
     </div>
   )
 }
+

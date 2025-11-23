@@ -12,7 +12,7 @@ export default function AdminLayoutWrapper({ children }: { children: React.React
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== "admin")) {
+    if (!loading && (!user || user.role !== "Admin" && user.role !== "SuperAdmin")) {
       router.push("/")
     }
   }, [user, loading, router])
@@ -21,7 +21,7 @@ export default function AdminLayoutWrapper({ children }: { children: React.React
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
 
-  if (!user || user.role !== "admin") {
+  if (!user || user.role !== "Admin" && user.role !== "SuperAdmin") {
     return null
   }
 

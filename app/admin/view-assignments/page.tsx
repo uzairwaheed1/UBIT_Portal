@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { Search, BookOpen, Users, Edit, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function ViewAssignments() {
   const [assignments, setAssignments] = useState([])
@@ -43,7 +44,7 @@ export default function ViewAssignments() {
 
   const fetchAssignments = async () => {
     try {
-      const response = await fetch("/api/assignments")
+      const response = await apiFetch("/api/assignments")
       const data = await response.json()
       if (data.success) {
         setAssignments(data.assignments)
@@ -69,7 +70,7 @@ export default function ViewAssignments() {
 
   const handleUpdate = async () => {
     try {
-      const response = await fetch(`/api/assignments/${editingAssignment._id}`, {
+      const response = await apiFetch(`/api/assignments/${editingAssignment._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -96,7 +97,7 @@ export default function ViewAssignments() {
 
   const handleDelete = async (assignmentId: string) => {
     try {
-      const response = await fetch(`/api/assignments/${assignmentId}`, {
+      const response = await apiFetch(`/api/assignments/${assignmentId}`, {
         method: "DELETE",
       })
 

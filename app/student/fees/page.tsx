@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
 import { DollarSign, Calendar, AlertCircle } from "lucide-react"
+import { apiFetch } from "@/lib/api-client"
 
 export default function StudentFees() {
   const { user } = useAuth()
@@ -17,7 +18,7 @@ export default function StudentFees() {
 
   const fetchFees = async () => {
     try {
-      const response = await fetch(`/api/fees?program=BS Computer Science&yearOfAdmission=2021`)
+      const response = await apiFetch(`/api/fees?program=BS Computer Science&yearOfAdmission=2021`)
       const data = await response.json()
 
       if (data.success && data.fees.length > 0) {

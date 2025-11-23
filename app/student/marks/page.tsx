@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { apiFetch } from "@/lib/api-client"
 
 export default function StudentMarks() {
   const { user } = useAuth()
@@ -23,7 +24,7 @@ export default function StudentMarks() {
     try {
       const query = selectedSemester ? `rollNo=${user?.rollNo}&semester=${selectedSemester}` : `rollNo=${user?.rollNo}`
 
-      const response = await fetch(`/api/marks?${query}`)
+      const response = await apiFetch(`/api/marks?${query}`)
       const data = await response.json()
 
       if (data.success) {

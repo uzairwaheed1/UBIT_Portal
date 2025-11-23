@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
 import { useToast } from "@/hooks/use-toast"
 import { Calendar, Clock, BookOpen } from "lucide-react"
+import { apiFetch } from "@/lib/api-client"
 
 export default function StudentAssignments() {
   const { user } = useAuth()
@@ -22,7 +23,7 @@ export default function StudentAssignments() {
 
   const fetchAssignments = async () => {
     try {
-      const response = await fetch(`/api/assignments?semester=${user?.semester}`)
+      const response = await apiFetch(`/api/assignments?semester=${user?.semester}`)
       const data = await response.json()
 
       if (data.success) {
@@ -37,7 +38,7 @@ export default function StudentAssignments() {
 
   const handleSubmitAssignment = async (assignmentId: string) => {
     try {
-      const response = await fetch("/api/assignments/submit", {
+      const response = await apiFetch("/api/assignments/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

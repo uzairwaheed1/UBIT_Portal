@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function UploadTimetable() {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ export default function UploadTimetable() {
     instructor: "",
     room: "",
   })
-  const [courses, setCourses] = useState([])
+  const [courses, setCourses] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -33,7 +34,7 @@ export default function UploadTimetable() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("/api/courses")
+      const response = await apiFetch("/api/courses")
       const data = await response.json()
       if (data.success) {
         setCourses(data.courses)
@@ -61,7 +62,7 @@ export default function UploadTimetable() {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/timetable", {
+      const response = await apiFetch("/api/timetable", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

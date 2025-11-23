@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Eye, EyeOff, Search, Users, Edit, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function ViewStudents() {
   const [students, setStudents] = useState([])
@@ -41,7 +42,7 @@ export default function ViewStudents() {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch("/api/students")
+      const response = await apiFetch("/api/students")
       const data = await response.json()
       if (data.success) {
         setStudents(data.students)
@@ -66,7 +67,7 @@ export default function ViewStudents() {
 
   const handleUpdate = async () => {
     try {
-      const response = await fetch(`/api/students/${editingStudent._id}`, {
+      const response = await apiFetch(`/api/students/${editingStudent._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -91,7 +92,7 @@ export default function ViewStudents() {
 
   const handleDelete = async (studentId: string) => {
     try {
-      const response = await fetch(`/api/students/${studentId}`, {
+      const response = await apiFetch(`/api/students/${studentId}`, {
         method: "DELETE",
       })
 

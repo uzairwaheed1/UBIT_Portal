@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Trash2, Edit, Plus } from "lucide-react"
+import { apiFetch } from "@/lib/api-client"
 
 export default function ManageCourses() {
   const [formData, setFormData] = useState({
@@ -33,7 +34,7 @@ export default function ManageCourses() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("/api/courses")
+      const response = await apiFetch("/api/courses")
       const data = await response.json()
       if (data.success) {
         setCourses(data.courses)
@@ -48,7 +49,7 @@ export default function ManageCourses() {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/courses", {
+      const response = await apiFetch("/api/courses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -90,7 +91,7 @@ export default function ManageCourses() {
     if (!editingCourse) return
 
     try {
-      const response = await fetch(`/api/courses/${editingCourse._id}`, {
+      const response = await apiFetch(`/api/courses/${editingCourse._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -121,7 +122,7 @@ export default function ManageCourses() {
     if (!confirm("Are you sure you want to delete this course?")) return
 
     try {
-      const response = await fetch(`/api/courses/${id}`, {
+      const response = await apiFetch(`/api/courses/${id}`, {
         method: "DELETE",
       })
 

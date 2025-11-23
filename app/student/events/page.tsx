@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Users, Clock } from "lucide-react"
+import { apiFetch } from "@/lib/api-client"
 
 export default function StudentEvents() {
   const [events, setEvents] = useState([])
@@ -15,7 +16,7 @@ export default function StudentEvents() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch("/api/events")
+      const response = await apiFetch("/api/events")
       const data = await response.json()
 
       if (data.success) {

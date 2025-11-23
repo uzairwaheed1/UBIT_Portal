@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
 import { Clock, User } from "lucide-react"
+import { apiFetch } from "@/lib/api-client"
 
 export default function StudentTimetable() {
   const { user } = useAuth()
@@ -19,7 +20,7 @@ export default function StudentTimetable() {
 
   const fetchTimetable = async () => {
     try {
-      const response = await fetch(`/api/timetable?semester=${user?.semester}`)
+      const response = await apiFetch(`/api/timetable?semester=${user?.semester}`)
       const data = await response.json()
 
       if (data.success) {

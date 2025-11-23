@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function UploadMarks() {
   const [formData, setFormData] = useState({
@@ -31,7 +32,7 @@ export default function UploadMarks() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("/api/courses")
+      const response = await apiFetch("/api/courses")
       const data = await response.json()
       if (data.success) {
         setCourses(data.courses)
@@ -46,7 +47,7 @@ export default function UploadMarks() {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/marks", {
+      const response = await apiFetch("/api/marks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

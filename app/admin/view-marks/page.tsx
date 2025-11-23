@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Search, FileText, Edit, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function ViewMarks() {
   const [marks, setMarks] = useState([])
@@ -44,7 +45,7 @@ export default function ViewMarks() {
 
   const fetchMarks = async () => {
     try {
-      const response = await fetch("/api/marks")
+      const response = await apiFetch("/api/marks")
       const data = await response.json()
       if (data.success) {
         setMarks(data.marks)
@@ -72,7 +73,7 @@ export default function ViewMarks() {
 
   const handleUpdate = async () => {
     try {
-      const response = await fetch(`/api/marks/${editingMark._id}`, {
+      const response = await apiFetch(`/api/marks/${editingMark._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -101,7 +102,7 @@ export default function ViewMarks() {
 
   const handleDelete = async (markId: string) => {
     try {
-      const response = await fetch(`/api/marks/${markId}`, {
+      const response = await apiFetch(`/api/marks/${markId}`, {
         method: "DELETE",
       })
 

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function UpdateFees() {
   const [formData, setFormData] = useState({
@@ -27,7 +28,7 @@ export default function UpdateFees() {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/fees", {
+      const response = await apiFetch("/api/fees", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

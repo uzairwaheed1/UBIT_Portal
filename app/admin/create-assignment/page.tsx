@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function CreateAssignment() {
   const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ export default function CreateAssignment() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("/api/courses")
+      const response = await apiFetch("/api/courses")
       const data = await response.json()
       if (data.success) {
         setCourses(data.courses)
@@ -45,7 +46,7 @@ export default function CreateAssignment() {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/assignments", {
+      const response = await apiFetch("/api/assignments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

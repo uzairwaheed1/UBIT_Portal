@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { apiFetch } from "@/lib/api-client"
 import { Users, FileText, BookOpen, Calendar } from "lucide-react"
 
 interface Stats {
@@ -25,7 +26,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch("/api/admin/stats")
+      const response = await apiFetch("/api/admin/stats")
       const data = await response.json()
       if (data.success) {
         setStats(data.stats)

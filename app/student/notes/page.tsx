@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
 import { FileText, Download, Play, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { apiFetch } from "@/lib/api-client"
 
 export default function StudentNotes() {
   const { user } = useAuth()
@@ -18,7 +19,7 @@ export default function StudentNotes() {
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch(`/api/notes?semester=${user?.semester}`)
+      const response = await apiFetch(`/api/notes?semester=${user?.semester}`)
       const data = await response.json()
 
       if (data.success) {

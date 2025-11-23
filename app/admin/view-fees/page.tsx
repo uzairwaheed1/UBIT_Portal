@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Search, DollarSign, Edit, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function ViewFees() {
   const [fees, setFees] = useState([])
@@ -41,7 +42,7 @@ export default function ViewFees() {
 
   const fetchFees = async () => {
     try {
-      const response = await fetch("/api/fees")
+      const response = await apiFetch("/api/fees")
       const data = await response.json()
       if (data.success) {
         setFees(data.fees)
@@ -66,7 +67,7 @@ export default function ViewFees() {
 
   const handleUpdate = async () => {
     try {
-      const response = await fetch(`/api/fees/${editingFee._id}`, {
+      const response = await apiFetch(`/api/fees/${editingFee._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -93,7 +94,7 @@ export default function ViewFees() {
 
   const handleDelete = async (feeId: string) => {
     try {
-      const response = await fetch(`/api/fees/${feeId}`, {
+      const response = await apiFetch(`/api/fees/${feeId}`, {
         method: "DELETE",
       })
 

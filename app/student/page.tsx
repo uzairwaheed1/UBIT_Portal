@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/auth-provider"
 import { BookOpen, FileText, TrendingUp, GraduationCap, Users } from "lucide-react"
+import { apiFetch } from "@/lib/api-client"
 
 interface DashboardData {
   currentGPA: number
@@ -40,10 +41,10 @@ export default function StudentDashboard() {
   const fetchDashboardData = async () => {
     try {
       const [marksRes, eventsRes, assignmentsRes, coursesRes] = await Promise.all([
-        fetch(`/api/marks?rollNo=${user?.rollNo}`),
-        fetch("/api/events"),
-        fetch(`/api/assignments?semester=${user?.semester}`),
-        fetch("/api/courses"),
+        apiFetch(`/api/marks?rollNo=${user?.rollNo}`),
+        apiFetch("/api/events"),
+        apiFetch(`/api/assignments?semester=${user?.semester}`),
+        apiFetch("/api/courses"),
       ])
 
       const [marksData, eventsData, assignmentsData, coursesData] = await Promise.all([

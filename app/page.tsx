@@ -11,10 +11,11 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/components/auth-provider"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 import { GraduationCap, Shield } from "lucide-react"
 
 export default function LoginPage() {
-  const [adminCredentials, setAdminCredentials] = useState({ username: "", password: "" })
+  const [adminCredentials, setAdminCredentials] = useState({ email: "", password: "" })
   const [studentCredentials, setStudentCredentials] = useState({ rollNo: "", password: "" })
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
@@ -22,24 +23,25 @@ export default function LoginPage() {
   const { toast } = useToast()
 
   const handleAdminLogin = async (e: React.FormEvent) => {
+    console.log(adminCredentials)
     e.preventDefault()
     setLoading(true)
 
     try {
-      const response = await fetch("/api/auth/admin", {
+      const response = await apiFetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(adminCredentials),
       })
 
       const data = await response.json()
+      console.log(data)
 
       if (response.ok) {
-        login({ id: data.admin.id, role: "admin" })
+        const user = data.user
+        login({ id: user.id, role: user.role, name: user.name, email: user.email, token: data.access_token })
         router.push("/admin")
-        toast({ title: "Login successful", description: "Welcome to admin panel" })
-      } else {
-        toast({ title: "Login failed", description: data.message, variant: "destructive" })
+        toast({ title: "Login successful", description: `Welcome ${user.name}` })
       }
     } catch (error) {
       toast({ title: "Error", description: "Something went wrong", variant: "destructive" })
@@ -53,7 +55,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/auth/student", {
+      const response = await apiFetch("/api/auth/student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(studentCredentials),
@@ -64,11 +66,13 @@ export default function LoginPage() {
       if (response.ok) {
         login({
           id: data.student._id,
-          role: "student",
+          role: "Student",
           name: data.student.name,
           rollNo: data.student.rollNo,
           semester: data.student.semester,
           domain: data.student.domain,
+          email: data.student.email,
+          token: data.access_token,
         })
         router.push("/student")
         toast({ title: "Login successful", description: `Welcome ${data.student.name}` })
@@ -187,8 +191,8 @@ export default function LoginPage() {
                         id="username"
                         type="text"
                         placeholder="Enter admin username"
-                        value={adminCredentials.username}
-                        onChange={(e) => setAdminCredentials((prev) => ({ ...prev, username: e.target.value }))}
+                        value={adminCredentials.email}
+                        onChange={(e) => setAdminCredentials((prev) => ({ ...prev, email: e.target.value }))}
                         required
                         className="h-11"
                       />

@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { apiFetch } from "@/lib/api-client"
 
 export default function ViewTimetable() {
   const [timetable, setTimetable] = useState([])
@@ -54,7 +55,7 @@ export default function ViewTimetable() {
 
   const fetchTimetable = async () => {
     try {
-      const response = await fetch("/api/timetable")
+      const response = await apiFetch("/api/timetable")
       const data = await response.json()
       if (data.success && Array.isArray(data.timetable)) {
         setTimetable(data.timetable)
@@ -80,7 +81,7 @@ export default function ViewTimetable() {
   const handleDeleteConfirm = async () => {
     setDeleting(true)
     try {
-      const response = await fetch(`/api/timetable/${deleteDialog.entryId}`, {
+      const response = await apiFetch(`/api/timetable/${deleteDialog.entryId}`, {
         method: "DELETE",
       })
 

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { apiFetch } from "@/lib/api-client"
 
 export default function UploadEvents() {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ export default function UploadEvents() {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/events", {
+      const response = await apiFetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

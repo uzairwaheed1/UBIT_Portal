@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { apiFetch } from "@/lib/api-client"
 
 export default function ViewEvents() {
   const [events, setEvents] = useState([])
@@ -46,7 +47,7 @@ export default function ViewEvents() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch("/api/events")
+      const response = await apiFetch("/api/events")
       const data = await response.json()
       if (data.success && Array.isArray(data.events)) {
         setEvents(data.events)
@@ -72,7 +73,7 @@ export default function ViewEvents() {
   const handleDeleteConfirm = async () => {
     setDeleting(true)
     try {
-      const response = await fetch(`/api/events/${deleteDialog.eventId}`, {
+      const response = await apiFetch(`/api/events/${deleteDialog.eventId}`, {
         method: "DELETE",
       })
 

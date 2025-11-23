@@ -11,13 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { apiFetch } from "@/lib/api-client"
 
-export default function AddFaculty() {
+export default function AddAdmin() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     designation: "",
     department: "",
-    joining_date: "",
+    contact_no: "",
   })
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
@@ -27,30 +27,28 @@ export default function AddFaculty() {
     setLoading(true)
 
     try {
-      const response = await apiFetch("/admin/faculty", {
+      const response = await apiFetch("/admin/admins", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       })
 
       const data = await response.json()
-      console.log(data)
-      console.log(response)
 
       if (response.ok) {
         toast({
           title: "Success",
-          description: `Faculty member added successfully!`,
+          description: `Admin user added successfully!`,
         })
         setFormData({
           name: "",
           email: "",
           designation: "",
           department: "",
-          joining_date: "",
+          contact_no: "",
         })
       } else {
-        toast({ title: "Error", description: data.message || "Failed to add faculty", variant: "destructive" })
+        toast({ title: "Error", description: data.message || "Failed to add admin", variant: "destructive" })
       }
     } catch (error) {
       toast({ title: "Error", description: "Something went wrong", variant: "destructive" })
@@ -61,12 +59,12 @@ export default function AddFaculty() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Add Faculty Member</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Add Admin User</h1>
 
       <Card className="max-w-2xl">
         <CardHeader>
-          <CardTitle>Faculty Information</CardTitle>
-          <CardDescription>Add a new faculty member to the system</CardDescription>
+          <CardTitle>Admin Information</CardTitle>
+          <CardDescription>Add a new admin user to the system</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -75,7 +73,7 @@ export default function AddFaculty() {
               <Input
                 id="name"
                 type="text"
-                placeholder="e.g., Dr. Salman Iqbal"
+                placeholder="e.g., Ayesha Khan"
                 value={formData.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 required
@@ -87,7 +85,7 @@ export default function AddFaculty() {
               <Input
                 id="email"
                 type="email"
-                placeholder="e.g., salman.iqbal@obe.edu.pk"
+                placeholder="e.g., ayesha.khan@obe.edu.pk"
                 value={formData.email}
                 onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                 required
@@ -105,11 +103,12 @@ export default function AddFaculty() {
                     <SelectValue placeholder="Select designation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Professor">Professor</SelectItem>
-                    <SelectItem value="Associate Professor">Associate Professor</SelectItem>
-                    <SelectItem value="Assistant Professor">Assistant Professor</SelectItem>
-                    <SelectItem value="Lecturer">Lecturer</SelectItem>
-                    <SelectItem value="Lab Instructor">Lab Instructor</SelectItem>
+                    <SelectItem value="SuperAdmin">Super Admin</SelectItem>
+                    <SelectItem value="Director Academics">Director Academics</SelectItem>
+                    <SelectItem value="Director Administration">Director Administration</SelectItem>
+                    <SelectItem value="Registrar">Registrar</SelectItem>
+                    <SelectItem value="Deputy Registrar">Deputy Registrar</SelectItem>
+                    <SelectItem value="Admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -130,24 +129,26 @@ export default function AddFaculty() {
                     <SelectItem value="Mathematics">Mathematics</SelectItem>
                     <SelectItem value="Physics">Physics</SelectItem>
                     <SelectItem value="English">English</SelectItem>
+                    <SelectItem value="Administration">Administration</SelectItem>
+                    <SelectItem value="Academics">Academics</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="joining_date">Joining Date</Label>
+              <Label htmlFor="contact_no">Contact Number</Label>
               <Input
-                id="joining_date"
-                type="date"
-                value={formData.joining_date}
-                onChange={(e) => setFormData((prev) => ({ ...prev, joining_date: e.target.value }))}
-                required
+                id="contact_no"
+                type="tel"
+                placeholder="e.g., +92-300-1112233"
+                value={formData.contact_no}
+                onChange={(e) => setFormData((prev) => ({ ...prev, contact_no: e.target.value }))}
               />
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Adding Faculty..." : "Add Faculty Member"}
+              {loading ? "Adding Admin..." : "Add Admin User"}
             </Button>
           </form>
         </CardContent>
@@ -155,3 +156,4 @@ export default function AddFaculty() {
     </div>
   )
 }
+

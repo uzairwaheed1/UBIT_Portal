@@ -17,6 +17,7 @@ import {
   Plus,
   Upload,
   UserCheck,
+  Shield,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -37,6 +38,14 @@ const navigation = [
     submenu: [
       { name: "Add Faculty", href: "/admin/add-faculty", icon: Plus },
       { name: "View Faculty", href: "/admin/view-faculty", icon: Eye },
+    ],
+  },
+  {
+    name: "Admins",
+    icon: Shield,
+    submenu: [
+      { name: "Add Admin", href: "/admin/add-admin", icon: Plus },
+      { name: "View Admins", href: "/admin/view-admin", icon: Eye },
     ],
   },
   {

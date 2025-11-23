@@ -12,7 +12,7 @@ export default function StudentLayoutWrapper({ children }: { children: React.Rea
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== "student")) {
+    if (!loading && (!user || user.role !== "Student")) {
       router.push("/")
     }
   }, [user, loading, router])
@@ -21,7 +21,7 @@ export default function StudentLayoutWrapper({ children }: { children: React.Rea
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
 
-  if (!user || user.role !== "student") {
+  if (!user || user.role !== "Student") {
     return null
   }
 
