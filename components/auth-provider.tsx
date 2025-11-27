@@ -14,6 +14,9 @@ interface User {
   domain?: string
   email?: string
   token?: string
+  designation?: string
+  department?: string
+  contact?: string
 }
 
 interface AuthContextType {

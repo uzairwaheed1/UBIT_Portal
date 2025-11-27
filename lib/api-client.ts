@@ -5,7 +5,8 @@ export function apiFetch(input: string, init?: RequestInit) {
   const url = `${API_BASE_URL}${path}`
     // Get token from localStorage
     const storedUser = typeof window !== "undefined" ? localStorage.getItem("user") : null
-    const token = storedUser ? JSON.parse(storedUser)?.token : null
+    const userData = storedUser ? JSON.parse(storedUser) : null
+    const token = userData?.access_token || userData?.token || null
     
     // Merge headers with Authorization
     const headers = new Headers(init?.headers)

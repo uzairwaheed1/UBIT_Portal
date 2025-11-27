@@ -71,6 +71,7 @@ const navigation = [
     name: "Management",
     icon: DollarSign,
     submenu: [
+      { name: "Batch Management", href: "/admin/batch-management", icon: GraduationCap },
       { name: "Update Fees", href: "/admin/update-fees", icon: DollarSign },
       { name: "View Fees", href: "/admin/view-fees", icon: Eye },
       { name: "Upload Timetable", href: "/admin/upload-timetable", icon: Clock },
