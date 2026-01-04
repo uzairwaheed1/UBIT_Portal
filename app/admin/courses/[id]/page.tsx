@@ -1,22 +1,33 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Edit } from "lucide-react"
+import { ArrowLeft, Edit, Plus } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { getCourseById } from "@/lib/course-service"
 import { getAllPrograms } from "@/lib/program-service"
+import { getCLOsByCourseId, CLO } from "@/lib/clo-service"
+import { CloList } from "@/components/clo/clo-list"
+import { CloDialog } from "@/components/clo/clo-dialog"
+import { CreateCloDialog } from "@/components/clo/create-clo-dialog"
 
 export default function ViewCoursePage() {
   const router = useRouter()
   const params = useParams()
   const { user } = useAuth()
+  const queryClient = useQueryClient()
   const courseId = Number.parseInt(params.id as string)
 
   const isAdmin = user?.role === "Admin" || user?.role === "SuperAdmin"
+
+  // State for CLO dialogs
+  const [createCloOpen, setCreateCloOpen] = useState(false)
+  const [selectedClo, setSelectedClo] = useState<CLO | null>(null)
+  const [cloDialogOpen, setCloDialogOpen] = useState(false)
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ["course", courseId],
@@ -28,6 +39,24 @@ export default function ViewCoursePage() {
     queryKey: ["programs"],
     queryFn: getAllPrograms,
   })
+
+  // Fetch CLOs for the current course
+  const { data: clos = [], isLoading: closLoading } = useQuery({
+    queryKey: ["clos", courseId],
+    queryFn: () => getCLOsByCourseId(courseId),
+    enabled: !!courseId,
+  })
+
+  // Refresh CLOs after create/update/delete
+  const handleCloSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["clos", courseId] })
+  }
+
+  // Handle CLO click - open dialog with CLO details
+  const handleCloClick = (clo: CLO) => {
+    setSelectedClo(clo)
+    setCloDialogOpen(true)
+  }
 
   if (courseLoading) {
     return (
@@ -74,10 +103,16 @@ export default function ViewCoursePage() {
           </div>
         </div>
         {isAdmin && (
-          <Button onClick={() => router.push(`/admin/courses/${course.id}/edit`)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Course
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setCreateCloOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create CLO
+            </Button>
+            <Button onClick={() => router.push(`/admin/courses/${course.id}/edit`)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Course
+            </Button>
+          </div>
         )}
       </div>
 
@@ -142,9 +177,35 @@ export default function ViewCoursePage() {
                 </p>
               </div>
             )}
+            {/* CLO List */}
+            <div className="mt-4">
+              {closLoading ? (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Course Learning Outcomes</label>
+                  <p className="text-sm text-gray-500 mt-1">Loading...</p>
+                </div>
+              ) : (
+                <CloList clos={clos} onCloClick={handleCloClick} />
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* CLO Dialogs */}
+      <CreateCloDialog
+        open={createCloOpen}
+        onOpenChange={setCreateCloOpen}
+        courseId={courseId}
+        onSuccess={handleCloSuccess}
+      />
+
+      <CloDialog
+        open={cloDialogOpen}
+        onOpenChange={setCloDialogOpen}
+        clo={selectedClo}
+        onSuccess={handleCloSuccess}
+      />
 
       {course.course_description && (
         <Card>
