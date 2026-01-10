@@ -14,6 +14,7 @@ import { getCLOsByCourseId, CLO } from "@/lib/clo-service"
 import { CloList } from "@/components/clo/clo-list"
 import { CloDialog } from "@/components/clo/clo-dialog"
 import { CreateCloDialog } from "@/components/clo/create-clo-dialog"
+import { CloPloMappingInline } from "@/components/clo/clo-plo-mapping-inline"
 
 export default function ViewCoursePage() {
   const router = useRouter()
@@ -217,6 +218,9 @@ export default function ViewCoursePage() {
           </CardContent>
         </Card>
       )}
+
+      {/* CLO-PLO Mapping Inline */}
+      <CloPloMappingInline courseId={courseId} programId={course.program_id} />
     </div>
   )
 }

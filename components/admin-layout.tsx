@@ -19,6 +19,7 @@ import {
   UserCheck,
   Shield,
   Target,
+  Network,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -66,6 +67,7 @@ const navigation = [
       { name: "Programs", href: "/admin/programs", icon: BookOpen },
       { name: "PLOs", href: "/admin/plos", icon: FileText },
       { name: "Courses", href: "/admin/courses", icon: BookOpen },
+      { name: "CLO-PLO Mappings", href: "/admin/clo-plo-mappings", icon: Network },
     ],
   },
   {

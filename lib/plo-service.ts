@@ -158,3 +158,27 @@ export async function deletePlo(id: number): Promise<{ message: string }> {
   }
 }
 
+/**
+ * Get PLOs by program ID
+ */
+export async function getPlosByProgramId(programId: number): Promise<PLO[]> {
+  try {
+    const response = await apiFetch(`/plos/program/${programId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || "Failed to fetch PLOs")
+    }
+
+    const result = await response.json()
+    return result.data || result
+  } catch (error) {
+    console.error("Error fetching PLOs:", error)
+    throw error
+  }
+}
