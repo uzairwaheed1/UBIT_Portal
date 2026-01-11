@@ -18,6 +18,8 @@ import {
   Upload,
   UserCheck,
   Shield,
+  Target,
+  Network,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -59,6 +61,17 @@ const navigation = [
     ],
   },
   {
+    name: "OBE Management",
+    icon: Target,
+    submenu: [
+      { name: "Programs", href: "/admin/programs", icon: BookOpen },
+      { name: "PLOs", href: "/admin/plos", icon: FileText },
+      { name: "Courses", href: "/admin/courses", icon: BookOpen },
+      { name: "CLO-PLO Mappings", href: "/admin/clo-plo-mappings", icon: Network },
+      { name: "OBE Results", href: "/admin/obe/results", icon: Upload },
+    ],
+  },
+  {
     name: "Resources",
     icon: BookOpen,
     submenu: [
@@ -80,6 +93,7 @@ const navigation = [
       { name: "View Events", href: "/admin/view-events", icon: Eye },
     ],
   },
+  
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -107,7 +121,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </div>
                     <div className="ml-6 space-y-1">
                       {item.submenu.map((subItem) => {
-                        const isActive = pathname === subItem.href
+                        const isActive = pathname === subItem.href || pathname.startsWith(subItem.href + "/")
                         return (
                           <Link
                             key={subItem.name}

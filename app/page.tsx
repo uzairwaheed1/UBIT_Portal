@@ -8,8 +8,6 @@ import {
   Link2,
   TrendingUp,
   FileText,
-  Code,
-  Database,
   BarChart3,
   GraduationCap,
   ArrowRight,
@@ -17,7 +15,6 @@ import {
   Users,
   Shield,
   Zap,
-  Globe,
   Mail,
   Phone,
   MapPin,
@@ -25,6 +22,8 @@ import {
   Linkedin,
   Github,
   Facebook,
+  FlaskConical,
+  Building2,
 } from "lucide-react"
 
 export default function LandingPage() {
@@ -58,7 +57,6 @@ export default function LandingPage() {
       detailed1Ref,
       detailed2Ref,
       detailed3Ref,
-      integrationsRef,
       testimonialsRef,
       ctaRef,
     ]
@@ -80,7 +78,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
@@ -113,26 +111,35 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center">
             {/* Left Column - Text (60%) */}
             <div className="lg:col-span-3">
+              {/* <div className="inline-block mb-4">
+                <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold text-white border border-white/30">
+                  University of Karachi
+                </span>
+              </div> */}
               <h1
                 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-white mb-6 leading-[1.2]"
                 style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}
               >
-                Welcome to OBE System
+                Chemical Engineering Department
+                <br />
+                <span className="bg-gradient-to-r from-orange-400 to-pink-400 bg-clip-text text-transparent">
+                  Learning Management System
+                </span>
               </h1>
               <p
                 className="text-2xl sm:text-3xl font-light text-white mb-6 leading-relaxed"
                 style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}
               >
-                Automating Outcome-Based Education for Smarter Academic Evaluation
+                Empowering Chemical Engineering Education Through Outcome-Based Learning
               </p>
-              <p
+              {/* <p
                 className="text-lg sm:text-xl mb-8 leading-relaxed"
                 style={{ color: "#d1d5db", fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}
               >
-                A comprehensive cloud-based platform that streamlines CLO–PLO–PEO evaluation,
+                A comprehensive platform designed specifically for the Chemical Engineering Department,
                 <br className="hidden sm:block" />
-                enabling continuous quality improvement and PEC-aligned outcome assessment.
-              </p>
+                featuring OBE-based evaluation, student management, and PEC-aligned outcome assessment.
+              </p> */}
               <Link href="/login">
                 <Button
                   size="lg"
@@ -183,7 +190,7 @@ export default function LandingPage() {
               className="text-lg max-w-[700px] mx-auto"
               style={{ color: "#6b7280", fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}
             >
-              Powerful tools designed to simplify outcome-based education management and evaluation
+              Comprehensive tools designed for Chemical Engineering students, faculty, and administrators
             </p>
           </div>
 
@@ -461,53 +468,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Integrations/Additional Features Section */}
-      <section
-        ref={integrationsRef}
-        className="py-12 lg:py-20 transition-all duration-1000 opacity-0 translate-y-8"
-        style={{ backgroundColor: "#f9fafb" }}
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2
-              className="text-3xl sm:text-4xl font-bold mb-4"
-              style={{ color: "#1f2937", fontSize: "2.5rem" }}
-            >
-              Technology Stack
-            </h2>
-            <p
-              className="text-lg max-w-[700px] mx-auto"
-              style={{ color: "#6b7280" }}
-            >
-              Built with modern technologies for scalability, performance, and maintainability
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Code, name: "Next.js", color: "#1f2937" },
-              { icon: Code, name: "NestJS", color: "#e11d48" },
-              { icon: Database, name: "MongoDB", color: "#10b981" },
-              { icon: BarChart3, name: "Chart.js", color: "#3b82f6" },
-            ].map((tech, idx) => (
-              <div
-                key={idx}
-                className="bg-white p-6 rounded-xl border-2 border-gray-200 hover:border-orange-500 transition-all duration-300 cursor-pointer text-center"
-                style={{ borderRadius: "12px" }}
-              >
-                <div className="mb-4 flex justify-center">
-                  <tech.icon className="h-12 w-12" style={{ color: tech.color }} />
-                </div>
-                <h4 className="font-semibold" style={{ color: "#1f2937" }}>
-                  {tech.name}
-                </h4>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials/Advisory Section */}
+      {/* Department Excellence Section */}
       <section
         ref={testimonialsRef}
         className="py-12 lg:py-20 transition-all duration-1000 opacity-0 translate-y-8"
@@ -521,34 +482,34 @@ export default function LandingPage() {
               className="text-3xl sm:text-4xl font-bold mb-4 text-white"
               style={{ fontSize: "2.5rem" }}
             >
-              Developed by Academic Excellence
+              Why Choose ChemE Portal?
             </h2>
             <p className="text-lg text-blue-100 max-w-2xl mx-auto">
-              Created by FYP Group at UBIT, University of Karachi
+              A dedicated platform built for the Chemical Engineering Department at University of Karachi
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                title: "Academic Focus",
-                description: "Designed specifically for educational institutions and outcome-based evaluation.",
-                icon: GraduationCap,
+                title: "Department-Specific",
+                description: "Tailored specifically for Chemical Engineering students and faculty with industry-relevant features and curriculum alignment.",
+                icon: FlaskConical,
               },
               {
-                title: "PEC Aligned",
-                description: "Fully compliant with Pakistan Engineering Council standards and requirements.",
+                title: "PEC Compliant",
+                description: "Fully aligned with Pakistan Engineering Council standards, ensuring your education meets professional accreditation requirements.",
                 icon: Shield,
               },
               {
-                title: "Innovation Driven",
-                description: "Leveraging cutting-edge technology for modern academic management.",
-                icon: Zap,
+                title: "Comprehensive Learning",
+                description: "Access assignments, notes, marks, timetable, events, and fees management all in one integrated platform.",
+                icon: GraduationCap,
               },
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20"
+                className="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20 hover:bg-white/15 transition-all duration-300"
                 style={{ borderRadius: "12px" }}
               >
                 <div className="mb-4">
@@ -566,11 +527,11 @@ export default function LandingPage() {
       <footer style={{ backgroundColor: "#0f172a" }}>
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Company Column */}
+            {/* Department Column */}
             <div>
-              <h4 className="text-white font-bold mb-4 text-lg">Company</h4>
+              <h4 className="text-white font-bold mb-4 text-lg">Department</h4>
               <ul className="space-y-2">
-                {["About Us", "Our Team", "Careers", "Contact"].map((item, idx) => (
+                {["About Department", "Faculty", "Programs", "Contact"].map((item, idx) => (
                   <li key={idx}>
                     <Link
                       href="#"
@@ -583,11 +544,11 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Product Column */}
+            {/* Portal Features Column */}
             <div>
-              <h4 className="text-white font-bold mb-4 text-lg">Product</h4>
+              <h4 className="text-white font-bold mb-4 text-lg">Portal Features</h4>
               <ul className="space-y-2">
-                {["Features", "Pricing", "Documentation", "Support"].map((item, idx) => (
+                {["Assignments", "Marks & Grades", "Notes", "Timetable", "Events", "Fees"].map((item, idx) => (
                   <li key={idx}>
                     <Link
                       href="#"
@@ -604,7 +565,7 @@ export default function LandingPage() {
             <div>
               <h4 className="text-white font-bold mb-4 text-lg">Resources</h4>
               <ul className="space-y-2">
-                {["Blog", "Case Studies", "Webinars", "Help Center"].map((item, idx) => (
+                {["OBE Guidelines", "PEC Standards", "Academic Calendar", "Help Center"].map((item, idx) => (
                   <li key={idx}>
                     <Link
                       href="#"
@@ -623,15 +584,15 @@ export default function LandingPage() {
               <ul className="space-y-3">
                 <li className="flex items-center gap-2 text-gray-400">
                   <Mail className="h-4 w-4" />
-                  <span>info@obesystem.edu</span>
+                  <span>cheme@uok.edu.pk</span>
                 </li>
                 <li className="flex items-center gap-2 text-gray-400">
                   <Phone className="h-4 w-4" />
-                  <span>+92 300 1234567</span>
+                  <span>+92 21 99261300</span>
                 </li>
                 <li className="flex items-start gap-2 text-gray-400">
                   <MapPin className="h-4 w-4 mt-1" />
-                  <span>University of Karachi, UBIT</span>
+                  <span>Chemical Engineering Department<br />University of Karachi, Karachi</span>
                 </li>
               </ul>
             </div>
@@ -641,8 +602,7 @@ export default function LandingPage() {
           <div className="border-t border-gray-800 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-gray-400 text-sm">
-                © {new Date().getFullYear()} OBE System. All rights reserved. Developed by FYP Group – UBIT,
-                University of Karachi.
+                © {new Date().getFullYear()} ChemE Portal - Chemical Engineering Department, University of Karachi. All rights reserved.
               </p>
               <div className="flex gap-4">
                 {[
