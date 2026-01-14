@@ -12,64 +12,112 @@ import { useToast } from "@/hooks/use-toast"
 import { Upload, X, FileSpreadsheet, ArrowLeft, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { parseExcelWithFlexibleHeaders, type ParsedStudent } from "@/lib/excel-parser"
-import { uploadBulkPLOResults } from "@/lib/obe-results-service"
 import { apiFetch } from "@/lib/api-client"
+import { getAllPrograms, type Program } from "@/lib/program-service"
 import { getAllBatches, type Batch } from "@/lib/batch-service"
-import { getAllCourses, type Course } from "@/lib/course-service"
+import { getSemestersByBatch } from "@/lib/course-offering-service"
+import { getCourseOfferings, type CourseOffering } from "@/lib/course-offering-service"
 
 export default function UploadOBEResultsPage() {
   const router = useRouter()
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Cascading dropdown states
+  const [programs, setPrograms] = useState<Program[]>([])
+  const [selectedProgramId, setSelectedProgramId] = useState<number | null>(null)
   const [batches, setBatches] = useState<Batch[]>([])
-  const [courses, setCourses] = useState<Course[]>([])
-  const [loadingBatches, setLoadingBatches] = useState(true)
-  const [loadingCourses, setLoadingCourses] = useState(true)
-  const [batchError, setBatchError] = useState<string | null>(null)
-  const [courseError, setCourseError] = useState<string | null>(null)
+  const [selectedBatchId, setSelectedBatchId] = useState<number | null>(null)
+  const [semesters, setSemesters] = useState<any[]>([])
+  const [selectedSemesterId, setSelectedSemesterId] = useState<number | null>(null)
+  const [courseOfferings, setCourseOfferings] = useState<CourseOffering[]>([])
+  const [selectedCourseOfferingId, setSelectedCourseOfferingId] = useState<number | null>(null)
+
+  // Loading states
+  const [loadingPrograms, setLoadingPrograms] = useState(true)
+  const [loadingBatches, setLoadingBatches] = useState(false)
+  const [loadingSemesters, setLoadingSemesters] = useState(false)
+  const [loadingCourseOfferings, setLoadingCourseOfferings] = useState(false)
+
+  // File upload states
   const [isParsing, setIsParsing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [parsedData, setParsedData] = useState<ParsedStudent[]>([])
   const [showPreview, setShowPreview] = useState(false)
 
-  const [formData, setFormData] = useState({
-    batchId: "",
-    semester: "",
-    courseCode: "",
-  })
-
+  // Fetch programs on mount
   useEffect(() => {
-    fetchBatches()
-    fetchCourses()
+    fetchPrograms()
   }, [])
 
-  const fetchBatches = async () => {
+  // Fetch batches when program changes
+  useEffect(() => {
+    if (selectedProgramId) {
+      fetchBatchesByProgram(selectedProgramId)
+    } else {
+      setBatches([])
+      setSelectedBatchId(null)
+    }
+  }, [selectedProgramId])
+
+  // Fetch semesters when batch changes
+  useEffect(() => {
+    if (selectedBatchId) {
+      fetchSemestersByBatch(selectedBatchId)
+    } else {
+      setSemesters([])
+      setSelectedSemesterId(null)
+    }
+  }, [selectedBatchId])
+
+  // Fetch course offerings when both batch and semester are selected
+  useEffect(() => {
+    if (selectedBatchId && selectedSemesterId) {
+      fetchCourseOfferingsByBatchAndSemester(selectedBatchId, selectedSemesterId)
+    } else {
+      setCourseOfferings([])
+      setSelectedCourseOfferingId(null)
+    }
+  }, [selectedBatchId, selectedSemesterId])
+
+  const fetchPrograms = async () => {
+    try {
+      setLoadingPrograms(true)
+      const programsData = await getAllPrograms()
+      setPrograms(Array.isArray(programsData) ? programsData : [])
+    } catch (error) {
+      console.error("Error fetching programs:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load programs",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingPrograms(false)
+    }
+  }
+
+  const fetchBatchesByProgram = async (programId: number) => {
     try {
       setLoadingBatches(true)
-      setBatchError(null)
-
-      console.log("Fetching batches from /admin/batches...") // Debug log
-
-      const batchesData = await getAllBatches()
-
-      console.log("Fetched batches:", batchesData) // Debug log
-
-      // Handle different response formats
-      const batchesArray = Array.isArray(batchesData) ? batchesData : []
-      setBatches(batchesArray)
-
-      if (batchesArray.length === 0) {
-        console.warn("No batches found") // Debug log
+      const allBatches = await getAllBatches()
+      const filteredBatches = allBatches.filter(
+        (batch) => batch.program_id === programId
+      )
+      setBatches(filteredBatches)
+      if (filteredBatches.length === 0) {
+        toast({
+          title: "No batches found",
+          description: "No batches found for the selected program",
+          variant: "default",
+        })
       }
     } catch (error) {
-      console.error("Error fetching batches:", error) // Debug log
-      const errorMessage = error instanceof Error ? error.message : "Failed to load batches"
-      setBatchError(errorMessage)
+      console.error("Error fetching batches:", error)
       toast({
-        title: "Error Loading Batches",
-        description: errorMessage + ". Please refresh the page.",
+        title: "Error",
+        description: "Failed to load batches",
         variant: "destructive",
       })
     } finally {
@@ -77,35 +125,71 @@ export default function UploadOBEResultsPage() {
     }
   }
 
-  const fetchCourses = async () => {
+  const fetchSemestersByBatch = async (batchId: number) => {
     try {
-      setLoadingCourses(true)
-      setCourseError(null)
-
-      console.log("Fetching courses from /admin/courses...") // Debug log
-
-      const coursesData = await getAllCourses()
-
-      console.log("Fetched courses:", coursesData) // Debug log
-
-      // Handle different response formats
-      const coursesArray = Array.isArray(coursesData) ? coursesData : []
-      setCourses(coursesArray)
-
-      if (coursesArray.length === 0) {
-        console.warn("No courses found") // Debug log
-      }
+      setLoadingSemesters(true)
+      console.log(`📤 [OBE Upload] Fetching semesters for batch ${batchId}...`)
+      
+      const semestersData = await getSemestersByBatch(batchId)
+      console.log(`📥 [OBE Upload] Received semesters:`, semestersData)
+      
+      // Filter: only active and unlocked semesters
+      // const activeUnlockedSemesters = semestersData.filter(
+      //   (sem: any) => sem.is_active === true && sem.is_locked === false
+      // )
+      
+      // console.log(`✅ [OBE Upload] Filtered ${activeUnlockedSemesters.length} active, unlocked semesters`)
+      setSemesters(semestersData)
+      
+      // if (activeUnlockedSemesters.length === 0 && semestersData.length > 0) {
+      //   toast({
+      //     title: "No active semesters",
+      //     description: `${semestersData.length} semester(s) found, but none are active and unlocked`,
+      //     variant: "default",
+      //   })
+      // } else if (activeUnlockedSemesters.length === 0) {
+      //   toast({
+      //     title: "No semesters found",
+      //     description: "No semesters found for this batch",
+      //     variant: "default",
+      //   })
+      // }
     } catch (error) {
-      console.error("Error fetching courses:", error) // Debug log
-      const errorMessage = error instanceof Error ? error.message : "Failed to load courses"
-      setCourseError(errorMessage)
+      console.error("❌ [OBE Upload] Error fetching semesters:", error)
+      setSemesters([])
       toast({
-        title: "Error Loading Courses",
-        description: errorMessage + ". Please refresh the page.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load semesters",
         variant: "destructive",
       })
     } finally {
-      setLoadingCourses(false)
+      setLoadingSemesters(false)
+    }
+  }
+
+  const fetchCourseOfferingsByBatchAndSemester = async (batchId: number, semesterId: number) => {
+    try {
+      setLoadingCourseOfferings(true)
+      const response = await apiFetch(`/admin/course-offerings/batch/${batchId}/semester/${semesterId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch course offerings")
+      }
+      const result = await response.json()
+      const offerings = result.data || result || []
+      setCourseOfferings(Array.isArray(offerings) ? offerings : [])
+    } catch (error) {
+      console.error("Error fetching course offerings:", error)
+      setCourseOfferings([])
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load course offerings",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingCourseOfferings(false)
     }
   }
 
@@ -165,6 +249,32 @@ export default function UploadOBEResultsPage() {
     }
   }
 
+  const handleProgramChange = (programId: string) => {
+    const id = programId === "none" ? null : parseInt(programId)
+    setSelectedProgramId(id)
+    setSelectedBatchId(null)
+    setSelectedSemesterId(null)
+    setSelectedCourseOfferingId(null)
+  }
+
+  const handleBatchChange = (batchId: string) => {
+    const id = batchId === "none" ? null : parseInt(batchId)
+    setSelectedBatchId(id)
+    setSelectedSemesterId(null)
+    setSelectedCourseOfferingId(null)
+  }
+
+  const handleSemesterChange = (semesterId: string) => {
+    const id = semesterId === "none" ? null : parseInt(semesterId)
+    setSelectedSemesterId(id)
+    setSelectedCourseOfferingId(null)
+  }
+
+  const handleCourseOfferingChange = (offeringId: string) => {
+    const id = offeringId === "none" ? null : parseInt(offeringId)
+    setSelectedCourseOfferingId(id)
+  }
+
   const handleParseFile = async () => {
     if (!selectedFile) {
       toast({
@@ -175,10 +285,10 @@ export default function UploadOBEResultsPage() {
       return
     }
 
-    if (!formData.batchId || !formData.semester || !formData.courseCode) {
+    if (!selectedProgramId || !selectedBatchId || !selectedSemesterId || !selectedCourseOfferingId) {
       toast({
         title: "Validation Error",
-        description: "Please fill all form fields before parsing",
+        description: "Please select Program, Batch, Semester, and Course Offering before parsing",
         variant: "destructive",
       })
       return
@@ -225,10 +335,10 @@ export default function UploadOBEResultsPage() {
       return
     }
 
-    if (!formData.batchId || !formData.courseCode) {
+    if (!selectedCourseOfferingId) {
       toast({
         title: "Validation Error",
-        description: "Please select batch and course before submitting",
+        description: "Please select a course offering before submitting",
         variant: "destructive",
       })
       return
@@ -237,10 +347,9 @@ export default function UploadOBEResultsPage() {
     try {
       setIsSubmitting(true)
 
-      // Prepare payload in exact format backend expects
+      // Prepare payload exactly as backend expects
       const payload = {
-        course_code: formData.courseCode,
-        batch_id: parseInt(formData.batchId), // Convert string to number
+        course_offering_id: selectedCourseOfferingId,
         students: parsedData.map((student) => ({
           roll_no: student.roll_no,
           student_name: student.student_name,
@@ -259,21 +368,56 @@ export default function UploadOBEResultsPage() {
         })),
       }
 
-      console.log("Submitting payload to /api/plo/upload-bulk:", payload) // Debug log
+      console.log("📤 Submitting payload:", payload)
 
-      const result = await uploadBulkPLOResults(payload)
+      const response = await apiFetch("/student-course-plo-results/upload-bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
 
-      console.log("Upload success response:", result) // Debug log
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        
+        // Extract backend validation errors
+        let errorMessage = errorData.message || "Failed to upload results"
+        
+        // Handle validation errors array
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorMessage = errorData.errors.join(", ")
+        } else if (errorData.error) {
+          errorMessage = errorData.error
+        } else if (typeof errorData === "string") {
+          errorMessage = errorData
+        }
+        
+        // Handle HTTP status codes
+        if (response.status === 400) {
+          errorMessage = errorMessage || "Validation error. Please check your data."
+        } else if (response.status === 401) {
+          errorMessage = "Authentication failed. Please log in again."
+        } else if (response.status === 403) {
+          errorMessage = "You don't have permission to upload results."
+        } else if (response.status === 404) {
+          errorMessage = "API endpoint not found. Please contact administrator."
+        } else if (response.status >= 500) {
+          errorMessage = errorMessage || "Server error. Please try again later."
+        }
 
-      const insertedCount = result.inserted_count || parsedData.length
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      console.log("✅ Upload successful:", result)
+
+      const insertedCount = result.inserted_count || result.stats?.inserted || result.count || parsedData.length
 
       toast({
         title: "Success",
         description: `✅ Successfully uploaded results for ${insertedCount} students!`,
       })
 
-      // Reset form and preview
-      setFormData({ batchId: "", semester: "", courseCode: "" })
+      // Reset form and preview after successful upload
       setSelectedFile(null)
       setParsedData([])
       setShowPreview(false)
@@ -286,21 +430,11 @@ export default function UploadOBEResultsPage() {
         router.push("/admin/obe/results")
       }, 2000)
     } catch (error) {
-      console.error("Upload error:", error) // Debug log
+      console.error("❌ Upload error:", error)
 
       let errorMessage = "Failed to upload results. Please try again."
       if (error instanceof Error) {
         errorMessage = error.message
-        // Handle specific error cases
-        if (error.message.includes("401") || error.message.includes("Unauthorized")) {
-          errorMessage = "Authentication failed. Please log in again."
-        } else if (error.message.includes("403") || error.message.includes("Forbidden")) {
-          errorMessage = "You don't have permission to upload results."
-        } else if (error.message.includes("404")) {
-          errorMessage = "API endpoint not found. Please contact administrator."
-        } else if (error.message.includes("500") || error.message.includes("Internal Server")) {
-          errorMessage = "Server error. Please try again later."
-        }
       }
 
       toast({
@@ -314,7 +448,7 @@ export default function UploadOBEResultsPage() {
   }
 
   const isFormValid = () => {
-    return formData.batchId && formData.semester && formData.courseCode && selectedFile
+    return selectedProgramId && selectedBatchId && selectedSemesterId && selectedCourseOfferingId && selectedFile
   }
 
   const isParseReady = () => {
@@ -322,12 +456,16 @@ export default function UploadOBEResultsPage() {
       isFormValid() &&
       !isParsing &&
       !isSubmitting &&
+      !loadingPrograms &&
       !loadingBatches &&
-      !loadingCourses &&
-      batches.length > 0 &&
-      courses.length > 0
+      !loadingSemesters &&
+      !loadingCourseOfferings
     )
   }
+
+  const selectedCourseOffering = courseOfferings.find(
+    (offering) => offering.id === selectedCourseOfferingId
+  )
 
   return (
     <div className="space-y-6">
@@ -348,27 +486,51 @@ export default function UploadOBEResultsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Results Upload Form</CardTitle>
-          <CardDescription>Select batch, semester, course, and upload Excel file</CardDescription>
+          <CardDescription>
+            Select Program → Batch → Semester → Course Offering, then upload Excel file
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {/* Form Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Cascading Dropdowns */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Program Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="program">Program *</Label>
+                <Select
+                  value={selectedProgramId?.toString() || "none"}
+                  onValueChange={handleProgramChange}
+                  disabled={loadingPrograms || isSubmitting}
+                >
+                  <SelectTrigger id="program">
+                    <SelectValue placeholder={loadingPrograms ? "Loading..." : "Select program"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Select program</SelectItem>
+                    {programs.map((program) => (
+                      <SelectItem key={program.id} value={program.id.toString()}>
+                        {program.code} - {program.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Batch Selection */}
               <div className="space-y-2">
                 <Label htmlFor="batch">Batch *</Label>
                 <Select
-                  value={formData.batchId}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, batchId: value }))}
-                  disabled={loadingBatches || isSubmitting}
+                  value={selectedBatchId?.toString() || "none"}
+                  onValueChange={handleBatchChange}
+                  disabled={!selectedProgramId || loadingBatches || isSubmitting}
                 >
                   <SelectTrigger id="batch">
                     <SelectValue
                       placeholder={
-                        loadingBatches
-                          ? "Loading batches..."
-                          : batchError
-                          ? "Error loading batches"
+                        !selectedProgramId
+                          ? "Select program first"
+                          : loadingBatches
+                          ? "Loading..."
                           : batches.length === 0
                           ? "No batches available"
                           : "Select batch"
@@ -376,107 +538,153 @@ export default function UploadOBEResultsPage() {
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {loadingBatches ? (
-                      <div className="p-2 text-sm text-gray-500">Loading batches...</div>
-                    ) : batches.length === 0 ? (
-                      <div className="p-2 text-sm text-gray-500">No batches available</div>
-                    ) : (
-                      batches.map((batch) => {
-                        // Handle different batch name formats from API
-                        const batchName =
-                          (batch as any).batchName || batch.name || `Batch ${batch.year || batch.id}`
-                        const displayText = batch.year ? `${batchName} (${batch.year})` : batchName
-                        return (
-                          <SelectItem key={batch.id} value={String(batch.id)}>
-                            {displayText}
-                          </SelectItem>
-                        )
-                      })
-                    )}
-                  </SelectContent>
-                </Select>
-                {batchError && (
-                  <p className="text-xs text-red-500 mt-1">{batchError}</p>
-                )}
-                {!loadingBatches && !batchError && batches.length === 0 && (
-                  <p className="text-xs text-gray-500 mt-1">No batches found. Please add batches first.</p>
-                )}
-              </div>
-
-              {/* Semester Selection */}
-              <div className="space-y-2">
-                <Label htmlFor="semester">Semester *</Label>
-                <Select
-                  value={formData.semester}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, semester: value }))}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger id="semester">
-                    <SelectValue placeholder="Select semester" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                      <SelectItem key={sem} value={String(sem)}>
-                        Semester {sem}
+                    <SelectItem value="none">Select batch</SelectItem>
+                    {batches.map((batch) => (
+                      <SelectItem key={batch.id} value={batch.id.toString()}>
+                        {batch.name} ({batch.year})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Course Code Selection */}
+              {/* Semester Selection */}
               <div className="space-y-2">
-                <Label htmlFor="courseCode">Course Code *</Label>
+                <Label htmlFor="semester">Semester *</Label>
                 <Select
-                  value={formData.courseCode}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, courseCode: value }))}
-                  disabled={loadingCourses || isSubmitting}
+                  value={selectedSemesterId?.toString() || "none"}
+                  onValueChange={handleSemesterChange}
+                  disabled={!selectedBatchId || loadingSemesters || isSubmitting}
                 >
-                  <SelectTrigger id="courseCode">
+                  <SelectTrigger id="semester">
                     <SelectValue
                       placeholder={
-                        loadingCourses
-                          ? "Loading courses..."
-                          : courseError
-                          ? "Error loading courses"
-                          : courses.length === 0
-                          ? "No courses available"
-                          : "Select course"
+                        !selectedBatchId
+                          ? "Select batch first"
+                          : loadingSemesters
+                          ? "Loading semesters..."
+                          : semesters.length === 0
+                          ? "No active semesters"
+                          : "Select semester"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {loadingSemesters ? (
+                      <div className="p-2 text-sm text-gray-500 flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Loading semesters...
+                      </div>
+                    ) : semesters.length === 0 ? (
+                      <div className="p-2 text-sm text-gray-500">
+                        No active, unlocked semesters available
+                      </div>
+                    ) : (
+                      <>
+                        <SelectItem value="none">Select semester</SelectItem>
+                        {semesters.map((semester) => (
+                          <SelectItem key={semester.id} value={semester.id.toString()}>
+                            Semester {semester.number}
+                            {semester.start_date && semester.end_date && (
+                              <span className="text-xs text-gray-500 ml-2">
+                                ({new Date(semester.start_date).getFullYear()})
+                              </span>
+                            )}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+                {semesters.length === 0 && selectedBatchId && !loadingSemesters && (
+                  <p className="text-xs text-amber-600">
+                    No active, unlocked semesters found for this batch
+                  </p>
+                )}
+                {semesters.length > 0 && (
+                  <p className="text-xs text-gray-500">
+                    {semesters.length} active semester(s) available
+                  </p>
+                )}
+              </div>
+
+              {/* Course Offering Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="courseOffering">Course Offering *</Label>
+                <Select
+                  value={selectedCourseOfferingId?.toString() || "none"}
+                  onValueChange={handleCourseOfferingChange}
+                  disabled={!selectedBatchId || !selectedSemesterId || loadingCourseOfferings || isSubmitting}
+                >
+                  <SelectTrigger id="courseOffering">
+                    <SelectValue
+                      placeholder={
+                        !selectedBatchId || !selectedSemesterId
+                          ? "Select batch and semester first"
+                          : loadingCourseOfferings
+                          ? "Loading..."
+                          : courseOfferings.length === 0
+                          ? "No offerings available"
+                          : "Select course offering"
                       }
                     />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
-                    {loadingCourses ? (
-                      <div className="p-2 text-sm text-gray-500">Loading courses...</div>
-                    ) : courses.length === 0 ? (
-                      <div className="p-2 text-sm text-gray-500">No courses available</div>
+                    {loadingCourseOfferings ? (
+                      <div className="p-2 text-sm text-gray-500">Loading course offerings...</div>
+                    ) : courseOfferings.length === 0 ? (
+                      <div className="p-2 text-sm text-gray-500">No course offerings available</div>
                     ) : (
-                      courses.map((course) => {
-                        // Handle different course code/name formats from API
-                        const courseCode = course.course_code || (course as any).code || ""
-                        const courseName = course.course_name || (course as any).name || ""
-                        const displayText = courseName ? `${courseCode} - ${courseName}` : courseCode
-
-                        return (
-                          <SelectItem key={course.id} value={courseCode}>
+                      <>
+                        <SelectItem value="none">Select course offering</SelectItem>
+                        {courseOfferings.map((offering) => (
+                          <SelectItem key={offering.id} value={offering.id.toString()}>
                             <div className="flex flex-col">
-                              <span className="font-medium">{courseCode}</span>
-                              {courseName && <span className="text-xs text-gray-500">{courseName}</span>}
+                              <span className="font-medium">
+                                {offering.course?.course_code || "N/A"}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {offering.course?.course_name || "N/A"}
+                                {offering.instructor && ` • ${offering.instructor.name}`}
+                              </span>
                             </div>
                           </SelectItem>
-                        )
-                      })
+                        ))}
+                      </>
                     )}
                   </SelectContent>
                 </Select>
-                {courseError && (
-                  <p className="text-xs text-red-500 mt-1">{courseError}</p>
-                )}
-                {!loadingCourses && !courseError && courses.length === 0 && (
-                  <p className="text-xs text-gray-500 mt-1">No courses found. Please add courses first.</p>
-                )}
               </div>
             </div>
+
+            {/* Selected Course Offering Info */}
+            {selectedCourseOffering && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-semibold text-blue-900 mb-2">Selected Course Offering:</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="text-blue-700 font-medium">Course:</span>
+                    <p className="text-blue-900">
+                      {selectedCourseOffering.course?.course_code} - {selectedCourseOffering.course?.course_name}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 font-medium">Semester:</span>
+                    <p className="text-blue-900">Semester {selectedCourseOffering.semester?.number}</p>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 font-medium">Batch:</span>
+                    <p className="text-blue-900">{selectedCourseOffering.batch?.name}</p>
+                  </div>
+                  {selectedCourseOffering.instructor && (
+                    <div>
+                      <span className="text-blue-700 font-medium">Instructor:</span>
+                      <p className="text-blue-900">{selectedCourseOffering.instructor.name}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* File Upload Section */}
             <div className="space-y-2">

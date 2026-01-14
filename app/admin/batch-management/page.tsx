@@ -53,12 +53,15 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import * as batchService from "@/lib/batch-service"
 import type { Batch, BatchSemester } from "@/lib/batch-service"
+import { getAllPrograms, type Program } from "@/lib/program-service"
+import { useQuery } from "@tanstack/react-query"
 import { Skeleton } from "@/components/ui/skeleton"
 
 // Form validation schema for creating batch
 const batchFormSchema = z.object({
   batchName: z.string().min(1, "Batch name is required").min(3, "Batch name must be at least 3 characters"),
   year: z.number().min(2000, "Year must be after 2000").max(2100, "Invalid year"),
+  program_id: z.number().min(1, "Program is required"),
   currentSemester: z.number().min(1, "Semester must be between 1-8").max(8, "Semester must be between 1-8"),
   semester_start_day: z.number().min(1, "Day must be between 1-31").max(31, "Day must be between 1-31"),
   semester_start_month: z.number().min(1, "Month must be between 1-12").max(12, "Month must be between 1-12"),
@@ -67,10 +70,11 @@ const batchFormSchema = z.object({
   status: z.enum(["Active", "Graduated", "Inactive"]),
 })
 
-// Form validation schema for editing batch (only name and status)
+// Form validation schema for editing batch (name, status, and program)
 const editBatchFormSchema = z.object({
   batchName: z.string().min(1, "Batch name is required").min(3, "Batch name must be at least 3 characters"),
   status: z.enum(["Active", "Graduated", "Inactive"]),
+  program_id: z.number().min(1, "Program is required"),
 })
 
 // Helper function to get month name
@@ -109,6 +113,12 @@ export default function BatchManagement() {
   const [loadingSemesters, setLoadingSemesters] = useState(false)
   const { toast } = useToast()
 
+  // Fetch programs
+  const { data: programs = [], isLoading: programsLoading } = useQuery({
+    queryKey: ["programs"],
+    queryFn: getAllPrograms,
+  })
+
   // Fetch batches on component mount
   useEffect(() => {
     fetchBatches()
@@ -142,6 +152,7 @@ export default function BatchManagement() {
     defaultValues: {
       batchName: "",
       year: new Date().getFullYear(),
+      program_id: 0,
       currentSemester: 1,
       semester_start_day: 1,
       semester_start_month: 1,
@@ -156,6 +167,7 @@ export default function BatchManagement() {
     defaultValues: {
       batchName: "",
       status: "Active",
+      program_id: 0,
     },
   })
 
@@ -169,9 +181,22 @@ export default function BatchManagement() {
   // Populate edit form when editing
   useEffect(() => {
     if (editingBatch) {
+      const programId =
+        editingBatch.program_id ||
+        (editingBatch as any).programId ||
+        editingBatch.program?.id ||
+        0
+
+      console.log("📝 [Batch Management] Populating edit form:", {
+        editingBatch,
+        programId,
+        batchKeys: Object.keys(editingBatch),
+      })
+
       editForm.reset({
         batchName: editingBatch.name || "",
         status: editingBatch.status,
+        program_id: programId,
       })
     }
   }, [editingBatch, editForm])
@@ -182,11 +207,15 @@ export default function BatchManagement() {
       const createData = {
         name: values.batchName,
         year: values.year,
+        program_id: values.program_id,
         semester_start_day: values.semester_start_day,
         semester_start_month: values.semester_start_month,
         semester_end_day: values.semester_end_day,
         semester_end_month: values.semester_end_month,
       }
+
+      console.log("📤 [Batch Management] Creating batch:", createData)
+
       await batchService.createBatch(createData)
       toast({
         title: "Success",
@@ -214,7 +243,14 @@ export default function BatchManagement() {
       const updateData = {
         name: values.batchName,
         status: values.status,
+        program_id: values.program_id,
       }
+
+      console.log("📤 [Batch Management] Updating batch:", {
+        batchId: editingBatch.id,
+        updateData,
+      })
+
       await batchService.updateBatch(editingBatch.id, updateData)
       toast({
         title: "Success",
@@ -420,6 +456,7 @@ export default function BatchManagement() {
                   <TableRow>
                     <TableHead>Batch Name</TableHead>
                     <TableHead>Year</TableHead>
+                    <TableHead>Program</TableHead>
                     <TableHead>Current Semester</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
@@ -434,6 +471,23 @@ export default function BatchManagement() {
                           <Calendar className="h-4 w-4 text-gray-400" />
                           {batch.year}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const programId = batch.program_id || (batch as any).programId || batch.program?.id
+                          const program = programId
+                            ? programs.find((p) => p.id === programId) || batch.program
+                            : null
+                          return program ? (
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="h-4 w-4 text-gray-400" />
+                              <span className="font-medium">{program.name}</span>
+                              <span className="text-sm text-gray-500">({program.code})</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 italic">Not assigned</span>
+                          )
+                        })()}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
@@ -572,6 +626,45 @@ export default function BatchManagement() {
                       />
                     </FormControl>
                     <FormDescription>Enter the batch year</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="program_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Program *</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(Number.parseInt(value) || 0)}
+                      value={field.value > 0 ? field.value.toString() : undefined}
+                      disabled={programsLoading}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a program" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {programsLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Loading programs...
+                          </SelectItem>
+                        ) : programs.length > 0 ? (
+                          programs.map((program) => (
+                            <SelectItem key={program.id} value={program.id.toString()}>
+                              {program.name} ({program.code})
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            No programs available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Select the program for this batch</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -777,6 +870,45 @@ export default function BatchManagement() {
                       <Input placeholder="e.g., 2021-2025" {...field} />
                     </FormControl>
                     <FormDescription>Enter a descriptive name for the batch</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="program_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Program *</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(Number.parseInt(value) || 0)}
+                      value={field.value > 0 ? field.value.toString() : undefined}
+                      disabled={programsLoading}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a program" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {programsLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Loading programs...
+                          </SelectItem>
+                        ) : programs.length > 0 ? (
+                          programs.map((program) => (
+                            <SelectItem key={program.id} value={program.id.toString()}>
+                              {program.name} ({program.code})
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            No programs available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Select the program for this batch</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
