@@ -68,6 +68,7 @@ const navigation = [
       { name: "PLOs", href: "/admin/plos", icon: FileText },
       { name: "Courses", href: "/admin/courses", icon: BookOpen },
       { name: "CLO-PLO Mappings", href: "/admin/clo-plo-mappings", icon: Network },
+      { name: "OBE Results", href: "/admin/obe/results", icon: Upload },
     ],
   },
   {
