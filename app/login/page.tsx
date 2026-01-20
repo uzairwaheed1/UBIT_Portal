@@ -343,13 +343,13 @@ export default function LoginPage() {
                   <CardContent>
                     <form onSubmit={handleStudentLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="studentEmail" className="text-sm font-medium">Email</Label>
+                      <Label htmlFor="rollNo" className="text-sm font-medium">Roll Number</Label>
                       <Input
-                        id="studentEmail"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={studentCredentials.email}
-                        onChange={(e) => setStudentCredentials((prev) => ({ ...prev, email: e.target.value }))}
+                        id="rollNo"
+                        type="text"
+                        placeholder="Enter your roll number"
+                        value={studentCredentials.rollNo}
+                        onChange={(e) => setStudentCredentials((prev) => ({ ...prev, rollNo: e.target.value }))}
                         required
                         className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
