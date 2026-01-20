@@ -18,7 +18,7 @@ import { facultyAuthService } from "@/lib/faculty-auth-service"
 
 export default function LoginPage() {
   const [adminCredentials, setAdminCredentials] = useState({ email: "", password: "" })
-  const [studentCredentials, setStudentCredentials] = useState({ rollNo: "", password: "" })
+  const [studentCredentials, setStudentCredentials] = useState({ email: "", password: "" })
   const [facultyCredentials, setFacultyCredentials] = useState({ email: "", password: "" })
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("student")
@@ -151,7 +151,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const response = await apiFetch("/api/auth/student", {
+      const response = await apiFetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(studentCredentials),
@@ -160,23 +160,31 @@ export default function LoginPage() {
       const data = await response.json()
 
       if (response.ok) {
-        login({
-          id: data.student._id,
-          role: "Student",
-          name: data.student.name,
-          rollNo: data.student.rollNo,
-          semester: data.student.semester,
-          domain: data.student.domain,
-          email: data.student.email,
-          token: data.access_token,
-        })
-        router.push("/student")
-        toast({ title: "Login successful", description: `Welcome ${data.student.name}` })
+        // Handle different possible response structures
+        const user = data.user || data.student
+        const accessToken = data.access_token || data.token
+        
+        if (user) {
+          login({
+            id: user.id || user._id || user.userId,
+            role: "Student",
+            name: user.name,
+            rollNo: user.rollNo || user.roll_no,
+            semester: user.semester,
+            domain: user.domain,
+            email: user.email || studentCredentials.email,
+            token: accessToken,
+          })
+          router.push("/student")
+          toast({ title: "Login successful", description: `Welcome ${user.name}` })
+        } else {
+          toast({ title: "Login failed", description: "Invalid response from server", variant: "destructive" })
+        }
       } else {
-        toast({ title: "Login failed", description: data.message, variant: "destructive" })
+        toast({ title: "Login failed", description: data.message || "Invalid credentials", variant: "destructive" })
       }
-    } catch (error) {
-      toast({ title: "Error", description: "Something went wrong", variant: "destructive" })
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Something went wrong", variant: "destructive" })
     } finally {
       setLoading(false)
     }

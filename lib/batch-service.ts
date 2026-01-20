@@ -11,6 +11,13 @@ export interface Batch {
   semester_end_day: number
   semester_end_month: number
   status: "Active" | "Graduated" | "Inactive"
+  program_id?: number
+  program?: {
+    id: number
+    code: string
+    name: string
+    department: string
+  }
   createdAt?: string
   updatedAt?: string
 }
@@ -22,11 +29,13 @@ export interface CreateBatchDto {
   semester_start_month: number
   semester_end_day: number
   semester_end_month: number
+  program_id: number
 }
 
 export interface UpdateBatchDto {
   name?: string
   status?: "Active" | "Graduated" | "Inactive"
+  program_id?: number
 }
 
 export interface BatchSemester {
@@ -43,6 +52,7 @@ function mapBatchData(batch: any): Batch {
   return {
     ...batch,
     currentSemester: batch.current_semester || batch.currentSemester || 1,
+    program_id: batch.program_id || batch.programId || batch.program?.id,
   }
 }
 

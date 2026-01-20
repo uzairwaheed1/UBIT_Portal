@@ -20,6 +20,7 @@ import {
   Shield,
   Target,
   Network,
+  BookMarked,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -68,6 +69,7 @@ const navigation = [
       { name: "PLOs", href: "/admin/plos", icon: FileText },
       { name: "Courses", href: "/admin/courses", icon: BookOpen },
       { name: "CLO-PLO Mappings", href: "/admin/clo-plo-mappings", icon: Network },
+      { name: "OBE Results", href: "/admin/obe/results", icon: Upload },
     ],
   },
   {
@@ -84,6 +86,7 @@ const navigation = [
     icon: DollarSign,
     submenu: [
       { name: "Batch Management", href: "/admin/batch-management", icon: GraduationCap },
+      { name: "Course Offerings", href: "/admin/course-offerings", icon: BookMarked },
       { name: "Update Fees", href: "/admin/update-fees", icon: DollarSign },
       { name: "View Fees", href: "/admin/view-fees", icon: Eye },
       { name: "Upload Timetable", href: "/admin/upload-timetable", icon: Clock },
