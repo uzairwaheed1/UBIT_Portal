@@ -5,36 +5,83 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
-import { Upload, FileText, GraduationCap, ArrowRight } from "lucide-react"
-import { getBatchesWithResults, type BatchWithResults } from "@/lib/obe-results-service"
+import { Upload, FileText, GraduationCap, ArrowRight, Eye, Loader2, Calendar, Users } from "lucide-react"
+import {
+  getCourseOfferingsWithResults,
+  getDetailedCourseOfferingResult,
+  type CourseOfferingWithResults,
+  type DetailedCourseOfferingResult,
+} from "@/lib/obe-results-service"
 
 export default function OBEResultsPage() {
-  const [batches, setBatches] = useState<BatchWithResults[]>([])
+  const [courseOfferings, setCourseOfferings] = useState<CourseOfferingWithResults[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedOffering, setSelectedOffering] = useState<CourseOfferingWithResults | null>(null)
+  const [detailedData, setDetailedData] = useState<DetailedCourseOfferingResult | null>(null)
+  const [loadingDetails, setLoadingDetails] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchBatches()
+    fetchCourseOfferings()
   }, [])
 
-  const fetchBatches = async () => {
+  const fetchCourseOfferings = async () => {
     try {
       setLoading(true)
-      const data = await getBatchesWithResults()
-      setBatches(data)
+      const data = await getCourseOfferingsWithResults()
+      setCourseOfferings(data)
     } catch (error) {
-      console.error("Error fetching batches:", error)
-      // Don't show error toast if it's a 404 - backend might not be implemented yet
+      console.error("Error fetching course offerings:", error)
       if (error instanceof Error && !error.message.includes("404")) {
         toast({
           title: "Error",
-          description: error.message || "Failed to fetch batches with results",
+          description: error.message || "Failed to fetch course offerings with results",
           variant: "destructive",
         })
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleRowClick = async (offering: CourseOfferingWithResults) => {
+    setSelectedOffering(offering)
+    setIsModalOpen(true)
+    setLoadingDetails(true)
+    setDetailedData(null)
+
+    try {
+      const data = await getDetailedCourseOfferingResult(offering.course_offering_id)
+      setDetailedData(data)
+    } catch (error) {
+      console.error("Error fetching detailed results:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch detailed results",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingDetails(false)
+    }
+  }
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "N/A"
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+    } catch {
+      return dateString
     }
   }
 
@@ -73,26 +120,22 @@ export default function OBEResultsPage() {
         </CardContent>
       </Card>
 
-      {/* Uploaded Results Section */}
+      {/* Course Offerings with Results Section */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Uploaded Results</h2>
-        <p className="text-gray-600 mb-6">View previously uploaded course results by batch</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Course Offerings with Results</h2>
+        <p className="text-gray-600 mb-6">Click on a row to view detailed student results</p>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <Skeleton className="h-6 w-32 mb-2" />
-                  <Skeleton className="h-4 w-48" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-10 w-full" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : batches.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : courseOfferings.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <GraduationCap className="h-12 w-12 text-gray-400 mb-4" />
@@ -107,31 +150,274 @@ export default function OBEResultsPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {batches.map((batch) => (
-              <Card key={batch.batch_id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <GraduationCap className="h-5 w-5 text-blue-600" />
-                    {batch.batch_name}
-                  </CardTitle>
-                  <CardDescription>
-                    {batch.courses_count} {batch.courses_count === 1 ? "course" : "courses"} uploaded
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link href={`/admin/obe/results/batch/${batch.batch_id}`}>
-                    <Button variant="outline" className="w-full">
-                      View Batch Results
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Course Code</TableHead>
+                      <TableHead>Course Name</TableHead>
+                      <TableHead>Batch</TableHead>
+                      <TableHead>Semester</TableHead>
+                      <TableHead>Instructor</TableHead>
+                      <TableHead className="text-center">Students</TableHead>
+                      <TableHead>Last Upload</TableHead>
+                      <TableHead className="text-center">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {courseOfferings.map((offering) => (
+                      <TableRow
+                        key={offering.course_offering_id}
+                        className="cursor-pointer hover:bg-gray-50"
+                        onClick={() => handleRowClick(offering)}
+                      >
+                        <TableCell className="font-mono font-semibold">
+                          {offering.course.course_code}
+                        </TableCell>
+                        <TableCell>{offering.course.course_name}</TableCell>
+                        <TableCell>{offering.batch.name}</TableCell>
+                        <TableCell>Semester {offering.semester.number}</TableCell>
+                        <TableCell>{offering.instructor?.name || "N/A"}</TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center gap-1">
+                            <Users className="h-4 w-4 text-gray-500" />
+                            {offering.summary.student_count}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {offering.summary.last_upload_date ? (
+                            <span className="inline-flex items-center gap-1 text-sm text-gray-600">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(offering.summary.last_upload_date)}
+                            </span>
+                          ) : (
+                            "N/A"
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRowClick(offering)
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
+
+      {/* Detailed Results Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedOffering && (
+                <>
+                  {selectedOffering.course.course_code} - {selectedOffering.course.course_name}
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedOffering && (
+                <>
+                  Batch: {selectedOffering.batch.name} • Semester {selectedOffering.semester.number}
+                  {selectedOffering.instructor && ` • Instructor: ${selectedOffering.instructor.name}`}
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingDetails ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <span className="ml-2 text-gray-600">Loading detailed results...</span>
+            </div>
+          ) : detailedData ? (
+            <div className="space-y-4">
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Total Students</p>
+                        <p className="font-semibold text-gray-900">{detailedData.summary.total_students}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">First Upload</p>
+                        <p className="font-semibold text-gray-900">
+                          {formatDate(detailedData.summary.first_upload_date)}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Last Upload</p>
+                        <p className="font-semibold text-gray-900">
+                          {formatDate(detailedData.summary.last_upload_date)}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Students Table */}
+              <div className="border rounded-lg overflow-hidden">
+                <div className="max-h-[500px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-gray-50 z-10">
+                      <TableRow>
+                        <TableHead className="w-16">#</TableHead>
+                        <TableHead>Roll No</TableHead>
+                        <TableHead>Student Name</TableHead>
+                        {Array.from({ length: 12 }, (_, i) => (
+                          <TableHead key={i + 1} className="text-center">
+                            PLO-{i + 1}
+                          </TableHead>
+                        ))}
+                        <TableHead>Upload Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {detailedData.students.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={16} className="text-center text-gray-500 py-8">
+                            No student results found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        detailedData.students.map((student, index) => (
+                          <TableRow key={student.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                            <TableCell className="font-medium">{index + 1}</TableCell>
+                            <TableCell className="font-mono">{student.roll_no}</TableCell>
+                            <TableCell>{student.student_name}</TableCell>
+                            <TableCell className="text-center">
+                              {student.plo1 !== null ? (
+                                <span className="font-medium">{student.plo1.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo2 !== null ? (
+                                <span className="font-medium">{student.plo2.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo3 !== null ? (
+                                <span className="font-medium">{student.plo3.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo4 !== null ? (
+                                <span className="font-medium">{student.plo4.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo5 !== null ? (
+                                <span className="font-medium">{student.plo5.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo6 !== null ? (
+                                <span className="font-medium">{student.plo6.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo7 !== null ? (
+                                <span className="font-medium">{student.plo7.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo8 !== null ? (
+                                <span className="font-medium">{student.plo8.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo9 !== null ? (
+                                <span className="font-medium">{student.plo9.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo10 !== null ? (
+                                <span className="font-medium">{student.plo10.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo11 !== null ? (
+                                <span className="font-medium">{student.plo11.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.plo12 !== null ? (
+                                <span className="font-medium">{student.plo12.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm text-gray-600">
+                              {formatDate(student.upload_timestamp)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">No detailed data available</div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {
   BookOpen,
@@ -157,13 +158,22 @@ export default function LandingPage() {
 
             {/* Right Column - Image (40%) */}
             <div className="lg:col-span-2 flex justify-center lg:justify-end">
-              <div className="relative animate-float">
+              <div className="relative animate-float w-full max-w-md">
                 <div
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20"
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-white/20 overflow-hidden group"
                   style={{ borderRadius: "24px" }}
                 >
-                  <div className="bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl p-6 h-64 w-full flex items-center justify-center">
-                    <BarChart3 className="h-32 w-32 text-white opacity-80" />
+                  <div className="relative rounded-xl overflow-hidden h-80 w-full">
+                    <Image
+                      src="/chemical 1.jpg"
+                      alt="Futuristic Chemical Engineering Laboratory"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      style={{ borderRadius: "12px" }}
+                      priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-pink-500/5" />
                   </div>
                 </div>
               </div>
@@ -275,11 +285,19 @@ export default function LandingPage() {
             {/* Image Side */}
             <div className="order-2 lg:order-1">
               <div
-                className="rounded-2xl shadow-xl overflow-hidden hover:scale-105 transition-transform duration-300"
+                className="rounded-2xl shadow-2xl overflow-hidden hover:scale-105 transition-all duration-500 group"
                 style={{ borderRadius: "24px" }}
               >
-                <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-12 h-80 flex items-center justify-center">
-                  <BookOpen className="h-40 w-40" style={{ color: "#1f2937" }} />
+                <div className="relative h-80 w-full">
+                  <Image
+                    src="/chemical 2.jpg"
+                    alt="Modern Chemical Engineering Laboratory with Advanced Equipment"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    style={{ borderRadius: "24px" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 group-hover:from-blue-500/5 group-hover:to-purple-500/5 transition-all duration-500" />
+                  <div className="absolute inset-0 ring-2 ring-transparent group-hover:ring-orange-500/20 transition-all duration-500" style={{ borderRadius: "24px" }} />
                 </div>
               </div>
             </div>
@@ -388,11 +406,19 @@ export default function LandingPage() {
             {/* Image Side */}
             <div>
               <div
-                className="rounded-2xl shadow-xl overflow-hidden hover:scale-105 transition-transform duration-300"
+                className="rounded-2xl shadow-2xl overflow-hidden hover:scale-105 transition-all duration-500 group"
                 style={{ borderRadius: "24px" }}
               >
-                <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-12 h-80 flex items-center justify-center">
-                  <Link2 className="h-40 w-40" style={{ color: "#1f2937" }} />
+                <div className="relative h-80 w-full">
+                  <Image
+                    src="/chemical_3.avif"
+                    alt="Advanced Chemical Engineering Research Facility"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    style={{ borderRadius: "24px" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 group-hover:from-purple-500/5 group-hover:to-pink-500/5 transition-all duration-500" />
+                  <div className="absolute inset-0 ring-2 ring-transparent group-hover:ring-orange-500/20 transition-all duration-500" style={{ borderRadius: "24px" }} />
                 </div>
               </div>
             </div>
@@ -411,11 +437,19 @@ export default function LandingPage() {
             {/* Image Side */}
             <div className="order-2 lg:order-1">
               <div
-                className="rounded-2xl shadow-xl overflow-hidden hover:scale-105 transition-transform duration-300"
+                className="rounded-2xl shadow-2xl overflow-hidden hover:scale-105 transition-all duration-500 group"
                 style={{ borderRadius: "24px" }}
               >
-                <div className="bg-gradient-to-br from-green-100 to-blue-100 p-12 h-80 flex items-center justify-center">
-                  <FileText className="h-40 w-40" style={{ color: "#1f2937" }} />
+                <div className="relative h-80 w-full">
+                  <Image
+                    src="/chemical 1.jpg"
+                    alt="State-of-the-Art Chemical Engineering Laboratory"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    style={{ borderRadius: "24px" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-blue-500/10 group-hover:from-green-500/5 group-hover:to-blue-500/5 transition-all duration-500" />
+                  <div className="absolute inset-0 ring-2 ring-transparent group-hover:ring-orange-500/20 transition-all duration-500" style={{ borderRadius: "24px" }} />
                 </div>
               </div>
             </div>

@@ -71,6 +71,93 @@ export interface CourseResultDetail {
   }>
 }
 
+// New types for the new API endpoints
+export interface CourseOfferingWithResults {
+  course_offering_id: number
+  course: {
+    id: number
+    course_code: string
+    course_name: string
+    program_id: number
+  }
+  semester: {
+    id: number
+    number: number
+    batch_id: number
+  }
+  batch: {
+    id: number
+    name: string
+    program_id: number
+  }
+  instructor: {
+    id: number
+    name: string
+    email: string
+  } | null
+  summary: {
+    student_count: number
+    last_upload_date: string | null
+    first_upload_date: string | null
+  }
+}
+
+export interface DetailedCourseOfferingResult {
+  course_offering: {
+    course_offering_id: number
+    course: {
+      id: number
+      course_code: string
+      course_name: string
+      program_id: number
+    }
+    semester: {
+      id: number
+      number: number
+      batch_id: number
+    }
+    batch: {
+      id: number
+      name: string
+      program_id: number
+    }
+    instructor: {
+      id: number
+      name: string
+      email: string
+    } | null
+  }
+  students: Array<{
+    id: number
+    student_id: number
+    roll_no: string
+    student_name: string
+    plo1: number | null
+    plo2: number | null
+    plo3: number | null
+    plo4: number | null
+    plo5: number | null
+    plo6: number | null
+    plo7: number | null
+    plo8: number | null
+    plo9: number | null
+    plo10: number | null
+    plo11: number | null
+    plo12: number | null
+    upload_timestamp: string
+    uploaded_by: {
+      id: number
+      name: string
+      email: string
+    } | null
+  }>
+  summary: {
+    total_students: number
+    last_upload_date: string | null
+    first_upload_date: string | null
+  }
+}
+
 /**
  * Upload bulk PLO results
  */
@@ -195,3 +282,56 @@ export async function getCourseResultDetail(
   }
 }
 
+/**
+ * Get list of course offerings with results
+ * GET /student-course-plo-results/course-offerings
+ */
+export async function getCourseOfferingsWithResults(): Promise<CourseOfferingWithResults[]> {
+  try {
+    const response = await apiFetch("/student-course-plo-results/course-offerings", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.message || error.error || "Failed to fetch course offerings with results")
+    }
+
+    const result = await response.json()
+    return result.data || result || []
+  } catch (error) {
+    console.error("Error fetching course offerings with results:", error)
+    throw error
+  }
+}
+
+/**
+ * Get detailed results for a specific course offering
+ * GET /student-course-plo-results/course-offering/:courseOfferingId
+ */
+export async function getDetailedCourseOfferingResult(
+  courseOfferingId: number,
+): Promise<DetailedCourseOfferingResult> {
+  try {
+    const response = await apiFetch(`/student-course-plo-results/course-offering/${courseOfferingId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.message || error.error || "Failed to fetch detailed course offering results")
+    }
+
+    const result = await response.json()
+    return result.data || result
+  } catch (error) {
+    console.error("Error fetching detailed course offering results:", error)
+    throw error
+  }
+}

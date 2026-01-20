@@ -4,12 +4,13 @@ import type React from "react"
 
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
-import { Home, FileText, BookOpen, DollarSign, Clock, Calendar, LogOut, User } from "lucide-react"
+import { Home, FileText, BookOpen, DollarSign, Clock, Calendar, LogOut, User, Target } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const navigation = [
   { name: "Dashboard", href: "/student", icon: Home },
+  { name: "OBE Dashboard", href: "/student/obe", icon: Target },
   { name: "Marks", href: "/student/marks", icon: FileText },
   { name: "Assignments", href: "/student/assignments", icon: BookOpen },
   { name: "Notes", href: "/student/notes", icon: BookOpen },
@@ -39,7 +40,8 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           </div>
           <nav className="mt-6">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              // Check if current path matches or starts with the href (for nested routes)
+              const isActive = pathname === item.href || pathname?.startsWith(item.href + "/")
               return (
                 <Link
                   key={item.name}
