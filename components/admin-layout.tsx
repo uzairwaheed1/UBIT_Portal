@@ -4,24 +4,7 @@ import type React from "react"
 
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
-import {
-  Users,
-  FileText,
-  BookOpen,
-  DollarSign,
-  Clock,
-  Trophy,
-  LogOut,
-  GraduationCap,
-  Eye,
-  Plus,
-  Upload,
-  UserCheck,
-  Shield,
-  Target,
-  Network,
-  BookMarked,
-} from "lucide-react"
+import { Users, FileText, BookOpen, DollarSign, Clock, Trophy, LogOut, GraduationCap, Eye, Plus, Upload, UserCheck, Shield, Target, Network, BookMarked, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -70,6 +53,7 @@ const navigation = [
       { name: "Courses", href: "/admin/courses", icon: BookOpen },
       { name: "CLO-PLO Mappings", href: "/admin/clo-plo-mappings", icon: Network },
       { name: "OBE Results", href: "/admin/obe/results", icon: Upload },
+      { name: "PLO Attainments", href: "/admin/obe/plo-attainments", icon: TrendingUp },
     ],
   },
   {
